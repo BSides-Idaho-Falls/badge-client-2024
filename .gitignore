@@ -1,0 +1,63 @@
+# secrets.py so WiFi Creds don't get committed to repo...
+secrets.py
+
+# test.py/dev.py as they are just debugging things
+test.py
+dev.py
+
+supersecret_1.txt
+supersecret_2.txt
+
+
+# Include stuff for common editors (vim, vscode, emacs)
+### Emacs ###
+# -*- mode: gitignore;i
+-*-
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Org-mode
+.org-id-locations
+*_archive
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+
+# Auto-generated tag files
+tags
+
+# Persistent undo
+[._]*.un~
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
