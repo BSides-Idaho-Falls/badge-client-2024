@@ -1,13 +1,14 @@
 import time
 import framebuf
+import uasyncio as asyncio
 
 
 class QueueItem:
 
-    def __init__(self, item_type: str, data: dict = None, secs_between_frames: float = None):
+    def __init__(self, item_type: str, data: dict = None, ms_between_frames: float = None):
         self.item_type: str = item_type
         self.data: dict = data
-        self.secs_between_frames: float = secs_between_frames
+        self.ms_between_frames: float = ms_between_frames
 
 
 class Display:
@@ -21,20 +22,22 @@ class Display:
     def queue_item(self, queue_item: QueueItem):
         self.queue.append(queue_item)
 
-    def run(self):
-        while True:
-            if len(self.queue) < 1:
-                time.sleep(0.3)
-                continue
-            queue_item: QueueItem = self.queue.pop(0)
-            if queue_item.item_type == "animation":
-                self.display_animation(queue_item)
-            elif queue_item.item_type == "clear":
-                self.clear_screen()
-            elif queue_item.item_type == "image":
-                self.display_image(queue_item)
+    async def run(self):
+        if len(self.queue) < 1:
+            await asyncio.sleep_ms(300)
+            return
+        queue_item: QueueItem = self.queue.pop(0)
+        if queue_item.item_type == "animation":
+            await self.display_animation(queue_item)
+        elif queue_item.item_type == "clear":
+            await self.clear_screen()
+        elif queue_item.item_type == "image":
+            await self.display_image(queue_item)
+        elif queue_item.item_type == "text":
+            await self.display_text(queue_item)
+        await asyncio.sleep_ms(20)  # Give core0 a chance to do other things
 
-    def clear_screen(self):
+    async def clear_screen(self):
         self.oled.fill(0)
         self.oled.show()
 
@@ -44,19 +47,28 @@ class Display:
         self.oled.blit(frame_buffer, 0, 0, 0)
         self.oled.show()
 
-    def display_image(self, queue_item: QueueItem):
+    async def display_image(self, queue_item: QueueItem):
         frame = queue_item.data["frame"]
         self._show_frame(frame)
 
-    def display_animation(self, queue_item: QueueItem):
+    async def display_text(self, queue_item: QueueItem):
+        i = 0
+        message = queue_item.data["message"]
+        self.oled.fill(0)
+        for item in message:
+            self.oled.text(item, 0, i)
+            i += 12
+        self.oled.show()
+
+    async def display_animation(self, queue_item: QueueItem):
         sequence = queue_item.data["sequence"]
         frames = queue_item.data["frames"]
-        delay = queue_item.secs_between_frames
+        delay = queue_item.ms_between_frames
 
         for index in sequence:
             frame = frames[index]
             self._show_frame(frame)
-            time.sleep(delay)  # Display is in a dedicated thread
+            await asyncio.sleep_ms(delay)
 
     def _local_grid_start_coords(self, x, y):
         x_shift = 63
