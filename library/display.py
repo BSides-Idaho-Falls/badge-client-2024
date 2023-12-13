@@ -1,4 +1,3 @@
-import time
 import framebuf
 import uasyncio as asyncio
 
@@ -35,7 +34,7 @@ class Display:
             await self.display_image(queue_item)
         elif queue_item.item_type == "text":
             await self.display_text(queue_item)
-        await asyncio.sleep_ms(20)  # Give core0 a chance to do other things
+        await asyncio.sleep_ms(20)
 
     async def clear_screen(self):
         self.oled.fill(0)

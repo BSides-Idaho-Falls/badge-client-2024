@@ -1,7 +1,9 @@
 import machine
-import network
 import ssd1306
+
+# pycharm IDE may say unused, but these are absolutely required
 from i2c_eeprom import i2c_eeprom_init, read_i2c, write_i2c
+
 
 def init_i2c():
     # I2C Setup Section
@@ -9,6 +11,7 @@ def init_i2c():
     sda_pin = machine.Pin(4)
     i2c_zero = machine.I2C(0, scl=scl_pin, sda=sda_pin, freq=400000)
     return i2c_zero
+
 
 def init_spi_eeprom():
     # SPI Setup Section
@@ -27,7 +30,5 @@ def init_oled(i2c_handle):
     oled_WIDTH = 128
     oled_HEIGHT = 64
     oled_addr = 0x3c
-    # oled = []
-    oled = ssd1306.SSD1306_I2C(oled_WIDTH, oled_HEIGHT,i2c_handle, oled_addr)
-    # oled = ssd1306.SSD1306_I2C(width, height, self.i2c, oled_addr)
+    oled = ssd1306.SSD1306_I2C(oled_WIDTH, oled_HEIGHT, i2c_handle, oled_addr)
     return oled
