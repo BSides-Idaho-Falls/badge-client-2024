@@ -10,7 +10,7 @@ FILES: List[str] = [
     "initialization.py",
     "main.py",
     "display.py",
-    #"display_helper.py",
+    #"display_helper.py",  # This takes a while to load, uncomment to load once
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
