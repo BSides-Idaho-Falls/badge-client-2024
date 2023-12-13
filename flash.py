@@ -14,7 +14,7 @@ FILES: List[str] = [
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
-    "/dev/cu.usbmodem101"
+    "/dev/cu.usbmodem101"  # Common location for MacOS
 ]
 
 
