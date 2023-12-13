@@ -3,6 +3,16 @@ import sys
 import time
 from typing import List, Optional
 
+# secrets.py sample:
+
+# CREDS = [
+#     {
+#         "ssid": "ssid",
+#         "password": "some-password-here"
+#     }
+# ]
+
+
 FILES: List[str] = [
     # "boot.py",
     # "i2c_eeprom.py",
