@@ -6,6 +6,7 @@ from library import atomics
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
 from display_helper import WINKING_POTATO
+from library.navigation import MainMenu, OfflineMenu
 from library.networking import Networking
 
 i2c_h = fu.init_i2c()
@@ -46,23 +47,42 @@ async def screen_updater(display: Display):
         await display.run()
 
 
+async def display_queue(display: Display):
+    atomics.MAIN_MENU = MainMenu()
+    while True:
+        queue_item = QueueItem("text", data={
+            "message": [
+                " -- Offline -- "
+            ],
+            "delay": 50
+        })
+        if atomics.NETWORK_CONNECTED == "connected":
+            lines = []
+            if atomics.STATE == "main_menu":
+                lines = atomics.MAIN_MENU.build_menu()
+            elif atomics.STATE == "game_menu":
+                lines = atomics.GAME_MENU.build_menu()
+            queue_item = QueueItem("text", data={
+                "message": lines
+            })
+
+        display.queue_item(queue_item)
+        await asyncio.sleep_ms(30)
+
+
 async def start_main():
     display: Display = Display(oled_h)
     networking: Networking = Networking()
     init_btns()
 
     asyncio.create_task(screen_updater(display))
-    asyncio.create_task(networking.run())
-    asyncio.create_task(btn_listener())
 
     display.queue_item(QueueItem("animation", WINKING_POTATO, 30))
 
+    asyncio.create_task(networking.run())
+    asyncio.create_task(btn_listener())
+    asyncio.create_task(display_queue(display))
+
     while True:
-        display.queue_item(QueueItem("text", data={
-            "message": [
-                atomics.NETWORK_CONNECTED,
-                atomics.NETWORK_SSID
-            ]
-        }))
         await asyncio.sleep_ms(5000)
         gc.collect()
