@@ -1,0 +1,79 @@
+import os
+import sys
+import time
+from typing import List, Optional
+
+FILES: List[str] = [
+    "boot.py",
+    "i2c_eeprom.py",
+    "ssd1306.py",
+    "initialization.py",
+    "main.py",
+    "display.py"
+]
+
+POSSIBLE_DEVICE_LOCATIONS: List[str] = [
+    "/dev/cu.usbmodem101"
+]
+
+
+def waitfor(seconds: int):
+    print("Sleeping for ", end="")
+    for i in range(seconds, 0, -1):
+        print(f"{i} ", end="", flush=True)
+        time.sleep(1)
+    print("")
+
+
+def detect_location() -> Optional[str]:
+    for location in POSSIBLE_DEVICE_LOCATIONS:
+        if os.path.exists(location):
+            return location
+    return None
+
+
+def start_flash(location: str, single_file: str = None):
+    if single_file:
+        print(f"Writing {single_file}")
+        os.system(f"ampy -p {location} put {single_file}")
+        return
+    print("Writing ", end="")
+    i = 0
+    for file in FILES:
+        i += 1
+        print(file, end="")
+        if file != FILES[-1]:
+            print(", ", end="", flush=True)
+        if i > 0 and i % 5 == 0:
+            print("")
+        os.system(f"ampy -p {location} put {file}")
+
+    print("")
+
+
+def init():
+    location: Optional[str] = detect_location()
+    if location is None:
+        print("No badge location found!")
+        return
+    print(f"Found location: {location}")
+    single_file: Optional[str] = None
+    loop: bool = "-loop" in sys.argv or "--loop" in sys.argv
+    if len(sys.argv) > 1:  # sys.argv[0] is the python script name itself
+        if ["-loop", "--loop"] not in sys.argv[1]:
+            single_file = sys.argv[1]
+    if loop:
+        print("Looping flash write")
+        while True:
+            print("Starting flash...")
+            start_flash(location, single_file=single_file)
+            print("Complete! Disconnect badge before restarting")
+            waitfor(5)
+    else:
+        print("Starting flash...")
+        start_flash(location, single_file=single_file)
+        print("Complete!")
+
+
+if __name__ == '__main__':
+    init()
