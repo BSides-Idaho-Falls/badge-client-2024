@@ -29,10 +29,22 @@ class Display:
                 self.display_animation(queue_item)
             elif queue_item.item_type == "clear":
                 self.clear_screen()
+            elif queue_item.item_type == "image":
+                self.display_image(queue_item)
 
     def clear_screen(self):
         self.oled.fill(0)
         self.oled.show()
+
+    def _show_frame(self, frame):
+        frame_buffer = framebuf.FrameBuffer(frame, 128, 64, framebuf.MONO_HMSB)
+        self.oled.fill(0)
+        self.oled.blit(frame_buffer, 0, 0, 0)
+        self.oled.show()
+
+    def display_image(self, queue_item: QueueItem):
+        frame = queue_item.data["frame"]
+        self._show_frame(frame)
 
     def display_animation(self, queue_item: QueueItem):
         sequence = queue_item.data["sequence"]
@@ -41,9 +53,5 @@ class Display:
 
         for index in sequence:
             frame = frames[index]
-            frame_buffer = framebuf.FrameBuffer(frame, 128, 64, framebuf.MONO_HMSB)
-            self.oled.fill(0)
-            self.oled.blit(frame_buffer, 0, 0, 0)
-            self.oled.show()
-            print(f"Wrote frame, waiting {delay}")
+            self._show_frame(frame)
             time.sleep(delay)  # Display is in a dedicated thread
