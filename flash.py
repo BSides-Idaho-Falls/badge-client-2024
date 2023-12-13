@@ -14,11 +14,11 @@ from typing import List, Optional
 
 
 FILES: List[str] = [
-    "boot.py",
-    "i2c_eeprom.py",
-    "ssd1306.py",
-    "initialization.py",
-    "main.py",
+    # "boot.py",
+    # "i2c_eeprom.py",
+    # "ssd1306.py",
+    # "initialization.py",
+    # "main.py",
     #"display_helper.py",  # This takes a while to load, uncomment to load once
     #"secrets.py",  # Make sure to add this!
 ]
@@ -27,9 +27,10 @@ DIRS: List[str] = [
     # "library/__init__.py",
     "library/atomics.py",
     "library/display.py",
-    "library/networking.py",
-    "library/buttons.py",
-    "library/badge.py"
+    # "library/networking.py",
+    # "library/buttons.py",
+    "library/badge.py",
+    "library/button_actions_base.py",
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [

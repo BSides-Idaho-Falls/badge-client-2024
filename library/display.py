@@ -49,6 +49,8 @@ class Display:
     async def display_image(self, queue_item: QueueItem):
         frame = queue_item.data["frame"]
         self._show_frame(frame)
+        if "delay" in queue_item.data:
+            await asyncio.sleep_ms(queue_item.data["delay"])
 
     async def display_text(self, queue_item: QueueItem):
         i = 0
@@ -58,6 +60,8 @@ class Display:
             self.oled.text(item, 0, i)
             i += 12
         self.oled.show()
+        if "delay" in queue_item.data:
+            await asyncio.sleep_ms(queue_item.data["delay"])
 
     async def display_animation(self, queue_item: QueueItem):
         sequence = queue_item.data["sequence"]
@@ -68,6 +72,8 @@ class Display:
             frame = frames[index]
             self._show_frame(frame)
             await asyncio.sleep_ms(delay)
+        if "delay" in queue_item.data:
+            await asyncio.sleep_ms(queue_item.data["delay"])
 
     def _local_grid_start_coords(self, x, y):
         x_shift = 63
