@@ -15,6 +15,8 @@ class Display:
     def __init__(self, oled):
         self.oled = oled
         self.queue: list = []
+        self.GRID_WIDTH = 8
+        self.GRID_HEIGHT = 8
 
     def queue_item(self, queue_item: QueueItem):
         self.queue.append(queue_item)
@@ -55,3 +57,34 @@ class Display:
             frame = frames[index]
             self._show_frame(frame)
             time.sleep(delay)  # Display is in a dedicated thread
+
+    def _local_grid_start_coords(self, x, y):
+        x_shift = 63
+        return (x * 8) + x_shift, ((7 - y) * 8)
+
+    def _local_grid_fill_coords(self, x, y):
+        x1, y1 = self._local_grid_start_coords(x, y)
+        self.oled.fill_rect(x1, y1, self.GRID_WIDTH, self.GRID_HEIGHT, framebuf.MONO_HMSB)
+
+    def _local_grid_icon_coords(self, x, y, icon):
+        x1, y1 = self._local_grid_start_coords(x, y)
+        if icon == "X":
+            self.oled.line(x1, y1, x1 + 8, y1 + 8, 1)
+            self.oled.line(x1, y1 + 8, x1 + 8, y1, 1)
+
+    def render_house(self, queue_item: QueueItem):
+        self.oled.fill(0)
+
+        self.oled.rect(63, 0, 64, 64, 1)
+
+        construction: list = queue_item.data["construction"]
+        for item in construction:
+            passable = item["passable"]
+            loc = item["local_location"]
+            if not passable:
+                if item["material_type"] == "player":
+                    self._local_grid_icon_coords(loc[0], loc[1], "X")
+                else:
+                    self._local_grid_fill_coords(loc[0], loc[1])
+
+        self.oled.show()
