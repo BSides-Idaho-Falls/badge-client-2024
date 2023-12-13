@@ -9,7 +9,8 @@ FILES: List[str] = [
     "ssd1306.py",
     "initialization.py",
     "main.py",
-    "display.py"
+    "display.py",
+    #"display_helper.py",
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
@@ -60,7 +61,7 @@ def init():
     single_file: Optional[str] = None
     loop: bool = "-loop" in sys.argv or "--loop" in sys.argv
     if len(sys.argv) > 1:  # sys.argv[0] is the python script name itself
-        if ["-loop", "--loop"] not in sys.argv[1]:
+        if "-loop" not in sys.argv[1] and "--loop" not in sys.argv[1]:
             single_file = sys.argv[1]
     if loop:
         print("Looping flash write")
