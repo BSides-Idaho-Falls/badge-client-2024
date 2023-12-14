@@ -1,13 +1,15 @@
+import json
+
 import uasyncio as asyncio
 import gc
 import initialization as fu
 import library.button_actions_base as ba
-from library import atomics
+from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
 from display_helper import WINKING_POTATO
 from library.navigation import MainMenu, OfflineMenu
-from library.networking import Networking
+from library.networking import Networking, Api
 
 i2c_h = fu.init_i2c()
 fu.i2c_eeprom_init(i2c_h)
@@ -19,6 +21,21 @@ def init_btns():
     button0 = fu.machine.Pin(0, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
     atomics.PB0 = Pushbutton(button0, suppress=True)
     atomics.PB1 = Pushbutton(button1, suppress=True)
+
+
+def init_api():
+    data = fileio.get_local_data()
+    print(f"Read {json.dumps(data)}")
+
+    # Required values
+    atomics.API_REGISTRATION_TOKEN = data["registration_token"]
+
+    # Optional values
+    atomics.API_TOKEN = data.get("api_token", "")
+    atomics.API_PLAYER_ID = data.get("player_id", "")
+    atomics.API_HOUSE_ID = data.get("house_id", "")
+
+    fileio.write_local_data(data)
 
 
 async def btn_listener():
@@ -39,6 +56,7 @@ async def btn_listener():
     # double press actions
     pb0.double_func(ba.double_press0, ())
     pb1.double_func(ba.double_press1, ())
+
     await asyncio.sleep_ms(1000)
 
 
@@ -47,9 +65,16 @@ async def screen_updater(display: Display):
         await display.run()
 
 
+def configure_api():
+    s1 = atomics.API_CLASS.create_player()
+    s2 = atomics.API_CLASS.create_house()
+    return s1 and s2
+
+
 async def display_queue(display: Display):
     atomics.MAIN_MENU = MainMenu()
     first_menu = True
+    api_configured = False
     while True:
         queue_item = QueueItem("text", data={
             "message": [
@@ -59,6 +84,9 @@ async def display_queue(display: Display):
         })
         can_queue = True
         if atomics.NETWORK_CONNECTED == "connected":
+            if not api_configured:
+                api_configured = configure_api()
+                continue
             lines = []
             can_queue = first_menu
             if atomics.STATE == "main_menu":
@@ -87,17 +115,17 @@ async def display_queue(display: Display):
 
 async def start_main():
     atomics.DISPLAY = Display(oled_h)
-    display: Display = atomics.DISPLAY
+    atomics.API_CLASS = Api()
     networking: Networking = Networking()
     init_btns()
+    asyncio.create_task(screen_updater(atomics.DISPLAY))
 
-    asyncio.create_task(screen_updater(display))
-
-    display.queue_item(QueueItem("animation", WINKING_POTATO, 30))
+    atomics.DISPLAY.queue_item(QueueItem("animation", WINKING_POTATO, 30))
 
     asyncio.create_task(networking.run())
+    init_api()
     asyncio.create_task(btn_listener())
-    asyncio.create_task(display_queue(display))
+    asyncio.create_task(display_queue(atomics.DISPLAY))
 
     while True:
         await asyncio.sleep_ms(5000)

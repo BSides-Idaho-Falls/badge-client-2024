@@ -51,6 +51,8 @@ class Display:
             await self.display_image(queue_item)
         elif queue_item.item_type == "text":
             await self.display_text(queue_item)
+        elif queue_item.item_type == "render_house":
+            await self.render_house(queue_item)
         await asyncio.sleep_ms(20)
 
     async def clear_screen(self):
@@ -108,7 +110,7 @@ class Display:
             self.oled.line(x1, y1, x1 + 8, y1 + 8, 1)
             self.oled.line(x1, y1 + 8, x1 + 8, y1, 1)
 
-    def render_house(self, queue_item: QueueItem):
+    async def render_house(self, queue_item: QueueItem):
         self.oled.fill(0)
 
         self.oled.rect(63, 0, 64, 64, 1)
@@ -122,5 +124,10 @@ class Display:
                     self._local_grid_icon_coords(loc[0], loc[1], "X")
                 else:
                     self._local_grid_fill_coords(loc[0], loc[1])
+
+        player_location = queue_item.data["player_location"]
+        x, y = player_location[0], player_location[1]
+
+        self.oled.text(f"{x}, {y}", 0, 0)
 
         self.oled.show()

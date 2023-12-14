@@ -1,17 +1,127 @@
+import json
 import time
 
 import secrets
 import network
+import urequests
 import ubinascii
 import uasyncio as asyncio
 
-from library import atomics
+from library import atomics, fileio
 
 
 class Api:
 
     def __init__(self):
-        pass
+        self.base_url = atomics.API_BASE_URL
+        self.in_house = False
+
+    def _make_request(self, method, url, headers=None, data=None):
+        if data is None:
+            data = {}
+        print(f"--> URL: {method} {url}")
+        print(f"--> Headers: {json.dumps(headers)}")
+        print(f"--> Payload: {json.dumps(data)}")
+        response = urequests.request(method, url, headers=headers, data=data)
+        response_data = response.json()
+        print(f"<-- {json.dumps(response_data)}")
+        return response_data
+
+    def move(self, direction):
+        if direction not in ["left", "right", "up", "down"]:
+            return None
+        if not atomics.NETWORK_MAC:
+            print("no mac")
+            return None
+        if not atomics.API_PLAYER_ID:
+            print("no player_id")
+            return None
+        if not self.in_house:
+            print("Not in house")
+            return None
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/move/{direction}"
+        response = self._make_request("POST", url, headers=headers)
+        return response
+
+
+    def enter_house(self):
+        if not atomics.NETWORK_MAC:
+            print("Failed to enter house because there's no network!")
+            return None
+        if not atomics.API_PLAYER_ID:
+            print("Failed to enter house because there's no player")
+            return None
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/enter_house"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response_data = self._make_request("POST", url, headers=headers)
+        if response_data["success"]:
+            self.in_house = True
+        return response_data
+
+    def leave_house(self):
+        if not atomics.NETWORK_MAC:
+            print("Failed to leave house because there's no network!")
+            return None
+        if not atomics.API_PLAYER_ID:
+            print("Failed to leave house because there's no player")
+            return None
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/leave_house"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response_data = self._make_request("POST", url, headers=headers)
+        if response_data["success"]:
+            self.in_house = False
+        return response_data
+
+
+
+
+    def create_house(self):
+        if not atomics.NETWORK_MAC:
+            print("Failed to create house because there's no network!")
+            return False
+        if not atomics.API_PLAYER_ID:
+            print("Failed to create house because there's no player")
+            return False
+
+        player_id = atomics.API_PLAYER_ID
+        url = f"{self.base_url}/api/house/{player_id}"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response_data = self._make_request("POST", url, headers=headers)
+        if response_data["success"]:
+            atomics.API_HOUSE_ID = response_data["house_id"]
+            db = fileio.get_local_data()
+            db["house_id"] = atomics.API_HOUSE_ID
+            fileio.write_local_data(db)
+        return True
+
+    def create_player(self):
+        if not atomics.NETWORK_MAC:
+            print("Failed to create player because there's no network!")
+            return False
+        player_id = atomics.NETWORK_MAC
+        url = f"{self.base_url}/api/player/{player_id}"
+        headers = {
+            "X-Register-Token": atomics.API_REGISTRATION_TOKEN
+        }
+        response_data = self._make_request("POST", url, headers=headers)
+        if response_data["success"]:
+            atomics.API_TOKEN = response_data["token"]
+            atomics.API_PLAYER_ID = response_data["player_id"]
+            db = fileio.get_local_data()
+            db["api_token"] = response_data["token"]
+            db["player_id"] = response_data["player_id"]
+            fileio.write_local_data(db)
+        return True
+
 
 
 class Networking:
@@ -31,9 +141,6 @@ class Networking:
             ssid, password = item["ssid"], item["password"]
             print(f"Checking wifi ssid {ssid}...")
             self.wlan_handle = self.wlan.connect(ssid, password)
-            wlan_mac = self.wlan.config('mac')
-            self.mac = ubinascii.hexlify(wlan_mac).decode()
-            self.ip = self.wlan.ifconfig()[0]
             attempts_left = 5
             while not self.wlan.isconnected() or attempts_left > 0:
                 attempts_left = attempts_left - 1
@@ -41,9 +148,12 @@ class Networking:
             if not self.wlan.isconnected():
                 print(f"Failed to connect to {ssid}")
                 continue
+            wlan_mac = self.wlan.config('mac')
+            self.mac = ubinascii.hexlify(wlan_mac).decode()
+            self.ip = self.wlan.ifconfig()[0]
             self.network_status = "connected"
             self.wifi_details = item
-            print(f"Connected to {ssid}!")
+            print(f"Connected to {ssid}! IP: {self.ip}, MAC: {self.mac}")
             return item
         return None
 

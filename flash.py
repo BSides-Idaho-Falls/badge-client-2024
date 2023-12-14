@@ -27,7 +27,7 @@ DIRS: List[str] = [
     # "library/__init__.py",
     "library/atomics.py",
     "library/display.py",
-    # "library/networking.py",
+    "library/networking.py",
     # "library/buttons.py",
     "library/badge.py",
     "library/button_actions_base.py",
