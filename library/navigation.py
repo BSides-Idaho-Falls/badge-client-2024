@@ -7,6 +7,7 @@ class Menu:
         self.menu_name = "Abstract"
         self.selected_item: str = "nop"
         self.menu_order = []
+        self.modified = True
         self.actions = {
             "nop": {
                 "message": "NOP",
@@ -17,10 +18,12 @@ class Menu:
 
     def increment_state(self):
         self.selected_item = self.actions[self.selected_item]["next"]
+        self.modified = True
         return self.selected_item
 
     def decrement_state(self):
         self.selected_item = self.actions[self.selected_item]["before"]
+        self.modified = True
         return self.selected_item
 
     def build_menu(self):
@@ -55,21 +58,21 @@ class MainMenu(Menu):
         self.header = "-- Main Menu --"
         self.selected_item: str = "info"
         self.menu_order = [
-            "info", "game", "settings"
+            "info", "game", "potato"
         ]
         self.actions = {
             "info": {
                 "message": "Info",
                 "next": "game",
-                "before": "settings"
+                "before": "potato"
             },
             "game": {
                 "message": "Game",
-                "next": "settings",
+                "next": "potato",
                 "before": "info"
             },
-            "settings": {
-                "message": "Settings",
+            "potato": {
+                "message": "Potato",
                 "next": "info",
                 "before": "game"
             },
@@ -104,6 +107,26 @@ class GameMenu(Menu):
                 "before": "enter"
             }
         }
+
+
+class InfoMenu(Menu):
+
+    def __init__(self, lines):
+        super().__init__()
+        self.menu_name = "info"
+        self.header = "  -- Info  --  "
+        self.selected_item: str = ""
+        self.menu_order = []
+        i = 0
+        self.actions = {}
+        for line in lines:
+            self.menu_order.append(str(i))
+            self.actions[str(i)] = {
+                "message": line,
+                "next": "0",
+                "before": "0"
+            }
+            i += 1
 
 
 class OfflineMenu(Menu):

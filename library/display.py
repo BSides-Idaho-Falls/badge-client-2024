@@ -1,6 +1,8 @@
 import framebuf
 import uasyncio as asyncio
 
+from library import atomics
+
 
 class QueueItem:
 
@@ -17,9 +19,24 @@ class Display:
         self.queue: list = []
         self.GRID_WIDTH = 8
         self.GRID_HEIGHT = 8
+        self.queue_frozen = False
 
     def queue_item(self, queue_item: QueueItem):
+        # if self.queue_frozen:
+        #     return
         self.queue.append(queue_item)
+
+    def clear_queue(self, item_type=None):
+        if not item_type:
+            self.queue = []
+            return
+        self.queue_frozen = True
+        queue = []
+        for item in self.queue:
+            if item_type != item.item_type:
+                queue.append(item)
+        self.queue = queue
+        self.queue_frozen = False
 
     async def run(self):
         if len(self.queue) < 1:
@@ -64,6 +81,7 @@ class Display:
             await asyncio.sleep_ms(queue_item.data["delay"])
 
     async def display_animation(self, queue_item: QueueItem):
+        atomics.FREEZE_BUTTONS = True
         sequence = queue_item.data["sequence"]
         frames = queue_item.data["frames"]
         delay = queue_item.ms_between_frames
@@ -74,6 +92,7 @@ class Display:
             await asyncio.sleep_ms(delay)
         if "delay" in queue_item.data:
             await asyncio.sleep_ms(queue_item.data["delay"])
+        atomics.FREEZE_BUTTONS = False
 
     def _local_grid_start_coords(self, x, y):
         x_shift = 63

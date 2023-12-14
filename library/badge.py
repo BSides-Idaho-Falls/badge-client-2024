@@ -49,6 +49,7 @@ async def screen_updater(display: Display):
 
 async def display_queue(display: Display):
     atomics.MAIN_MENU = MainMenu()
+    first_menu = True
     while True:
         queue_item = QueueItem("text", data={
             "message": [
@@ -56,22 +57,37 @@ async def display_queue(display: Display):
             ],
             "delay": 50
         })
+        can_queue = True
         if atomics.NETWORK_CONNECTED == "connected":
             lines = []
+            can_queue = first_menu
             if atomics.STATE == "main_menu":
                 lines = atomics.MAIN_MENU.build_menu()
+                if atomics.MAIN_MENU.modified:
+                    can_queue = True
+                    atomics.MAIN_MENU.modified = False
             elif atomics.STATE == "game_menu":
                 lines = atomics.GAME_MENU.build_menu()
+                if atomics.GAME_MENU.modified:
+                    can_queue = True
+                    atomics.GAME_MENU.modified = False
+            elif atomics.STATE == "info_menu":
+                lines = atomics.INFO_MENU.build_menu()
+                if atomics.INFO_MENU.modified:
+                    can_queue = True
+                    atomics.INFO_MENU.modified = False
             queue_item = QueueItem("text", data={
                 "message": lines
             })
-
-        display.queue_item(queue_item)
+        if can_queue:
+            display.queue_item(queue_item)
+            first_menu = False
         await asyncio.sleep_ms(30)
 
 
 async def start_main():
-    display: Display = Display(oled_h)
+    atomics.DISPLAY = Display(oled_h)
+    display: Display = atomics.DISPLAY
     networking: Networking = Networking()
     init_btns()
 

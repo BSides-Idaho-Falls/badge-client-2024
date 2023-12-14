@@ -32,6 +32,7 @@ DIRS: List[str] = [
     "library/badge.py",
     "library/button_actions_base.py",
     "library/navigation.py",
+    "library/fileio.py"
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
