@@ -2,7 +2,7 @@ import display_helper
 from library import atomics
 from library.action_class import ButtonAction
 from library.display import QueueItem
-from library.navigation import InfoMenu, GameMenu
+from library.navigation import InfoMenu, GameMenu, AnimationMenu
 
 
 class MainMenuActions(ButtonAction):
@@ -31,13 +31,7 @@ class MainMenuActions(ButtonAction):
                 atomics.NETWORK_IP
             ]
             atomics.INFO_MENU = atomics.INFO_MENU = InfoMenu(lines)
-        elif selected_item == "potato":
-            for i in range(0, 3):
-                atomics.DISPLAY.queue_item(
-                    QueueItem(
-                        "animation",
-                        data=display_helper.WINKING_POTATO,
-                        ms_between_frames=50
-                    )
-                )
-            atomics.MAIN_MENU.modified = True
+        elif selected_item == "animate":
+            atomics.ANIMATE_MENU = AnimationMenu()
+            atomics.STATE = "animate_menu"
+            atomics.MAIN_MENU = None

@@ -22,6 +22,7 @@ PB1 = None
 MAIN_MENU: Menu = None
 GAME_MENU: Menu = None
 INFO_MENU: Menu = None
+ANIMATE_MENU: Menu = None
 
 
 API_BASE_URL = "http://10.10.0.10:8080"
