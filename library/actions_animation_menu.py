@@ -24,7 +24,7 @@ class AnimationMenuActions(ButtonAction):
     def long_press0(self):
         selected_item = atomics.ANIMATE_MENU.selected_item
         if selected_item not in display_helper.ANIMATION_MAPPER:
-            # This could happen when we have not locally stored animations in
+            # This could happen when we don't have locally stored animations in
             # the menu. Add code to pull data from server then display it :)
             AnimationMenuActions.display_remote_animation(selected_item)
             return
