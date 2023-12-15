@@ -70,7 +70,6 @@ class Api:
             return response_data
         return self.enter_house_error_handler(response_data)
 
-
     def leave_house(self):
         if not atomics.NETWORK_MAC:
             print("Failed to leave house because there's no network!")
@@ -129,7 +128,6 @@ class Api:
             db["player_id"] = response_data["player_id"]
             fileio.write_local_data(db)
         return True
-
 
 
 class Networking:
