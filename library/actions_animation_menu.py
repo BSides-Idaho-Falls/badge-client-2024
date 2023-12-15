@@ -26,23 +26,31 @@ class AnimationMenuActions(ButtonAction):
         if selected_item not in display_helper.ANIMATION_MAPPER:
             # This could happen when we have not locally stored animations in
             # the menu. Add code to pull data from server then display it :)
-            atomics.DISPLAY.queue_item(
-                QueueItem(
-                    "text",
-                    data={
-                        "message": [
-                            "Remote",
-                            "animations",
-                            "not yet",
-                            "supported"
-                        ],
-                        "delay": 2000
-                    }
-                )
-            )
-            atomics.ANIMATE_MENU.modified = True
+            AnimationMenuActions.display_remote_animation(selected_item)
             return
-        item = display_helper.ANIMATION_MAPPER[selected_item]
+        AnimationMenuActions.display_local_animation(selected_item)
+
+    @staticmethod
+    def display_remote_animation(name):
+        atomics.DISPLAY.queue_item(
+            QueueItem(
+                "text",
+                data={
+                    "message": [
+                        "Remote",
+                        "animations",
+                        "not yet",
+                        "supported"
+                    ],
+                    "delay": 2000
+                }
+            )
+        )
+        atomics.ANIMATE_MENU.modified = True
+
+    @staticmethod
+    def display_local_animation(name):
+        item = display_helper.ANIMATION_MAPPER[name]
         contents = item["contents"]
         iterations = item.get("iterations", 1)
         frame_time = item.get("frame_time_ms", 50)
