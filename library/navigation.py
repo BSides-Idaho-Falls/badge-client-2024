@@ -17,11 +17,23 @@ class Menu:
         }
 
     def increment_state(self):
+        if "next" not in self.actions[self.selected_item]:
+            indx = self.menu_order.index(self.selected_item)
+            new_indx = 0 if indx >= len(self.menu_order) - 1 else indx + 1
+            self.selected_item = self.menu_order[new_indx]
+            self.modified = True
+            return self.selected_item
         self.selected_item = self.actions[self.selected_item]["next"]
         self.modified = True
         return self.selected_item
 
     def decrement_state(self):
+        if "before" not in self.actions[self.selected_item]:
+            indx = self.menu_order.index(self.selected_item)
+            new_indx = len(self.menu_order) - 1 if indx == 0 else indx - 1
+            self.selected_item = self.menu_order[new_indx]
+            self.modified = True
+            return self.selected_item
         self.selected_item = self.actions[self.selected_item]["before"]
         self.modified = True
         return self.selected_item
@@ -62,21 +74,15 @@ class MainMenu(Menu):
         ]
         self.actions = {
             "info": {
-                "message": "Info",
-                "next": "game",
-                "before": "animate"
+                "message": "Info"
             },
             "game": {
-                "message": "Game",
-                "next": "animate",
-                "before": "info"
+                "message": "Game"
             },
             "animate": {
-                "message": "Animations",
-                "next": "info",
-                "before": "game"
+                "message": "Animations"
             },
-            "none": {  # Prevents actions while in a locked state
+            "none": {  # Prevents actions while in a locked state: DO NOT EDIT
                 "message": "",
                 "next": "info",  # If you get stuck in this state you can still increment
                 "before": "info",
@@ -97,14 +103,16 @@ class GameMenu(Menu):
         ]
         self.actions = {
             "enter": {
-                "message": "Enter House",
-                "next": "rob",
-                "before": "rob"
+                "message": "Enter House"
             },
             "rob": {
-                "message": "Rob House",
-                "next": "enter",
-                "before": "enter"
+                "message": "Rob House"
+            },
+            "none": {  # Prevents actions while in a locked state: DO NOT EDIT
+                "message": "",
+                "next": "info",  # If you get stuck in this state you can still increment
+                "before": "info",
+                "hidden": True
             }
         }
 
@@ -141,8 +149,12 @@ class AnimationMenu(Menu):
         ]
         self.actions = {
             "potato": {
-                "message": "Potato",
-                "next": "potato",
-                "before": "potato"
+                "message": "Potato"
+            },
+            "none": {  # Prevents actions while in a locked state: DO NOT EDIT
+                "message": "",
+                "next": "info",  # If you get stuck in this state you can still increment
+                "before": "info",
+                "hidden": True
             }
         }
