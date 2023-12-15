@@ -5,13 +5,15 @@ from library.actions_game import GameActions
 from library.actions_game_menu import GameMenuActions
 from library.actions_info_menu import InfoMenuActions
 from library.actions_main_menu import MainMenuActions
+from library.actions_offline_menu import OfflineMenuActions
 
 BUTTON_ACTION_MAPPER: dict = {
     "game": GameActions,
     "game_menu": GameMenuActions,
     "main_menu": MainMenuActions,
     "info_menu": InfoMenuActions,
-    "animate_menu": AnimationMenuActions
+    "animate_menu": AnimationMenuActions,
+    "offline_menu": OfflineMenuActions
 }
 
 

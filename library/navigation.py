@@ -1,3 +1,5 @@
+from display_helper import ANIMATION_MAPPER
+
 
 class Menu:
 
@@ -76,6 +78,22 @@ class MainMenu(Menu):
         }
 
 
+class OfflineMenu(Menu):
+
+    def __init__(self):
+        super().__init__()
+        self.menu_name = "offline_menu"
+        self.header = "-- Offline --"
+        self.selected_item: str = "info"
+        self.menu_order = [
+            "info", "animate"
+        ]
+        self.actions = {
+            "info": "Info",
+            "animate": "Animations"
+        }
+
+
 class GameMenu(Menu):
 
     def __init__(self):
@@ -115,9 +133,9 @@ class AnimationMenu(Menu):
         self.menu_name = "animations"
         self.header = " -- Animate -- "
         self.selected_item: str = "potato"
-        self.menu_order = [
-            "potato"
-        ]
-        self.actions = {
-            "potato": "Potato"
-        }
+        self.menu_order = [item for item in ANIMATION_MAPPER]
+        self.actions = {}
+        for item in ANIMATION_MAPPER:
+            chars = [c for c in item]
+            chars[0] = chars[0].upper()
+            self.actions[item] = "".join(chars)

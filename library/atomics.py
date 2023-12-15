@@ -2,10 +2,11 @@ from library.navigation import Menu
 from library.networking import Api
 
 NETWORK_CONNECTED = "disconnected"
-NETWORK_SSID = "N/A"
-NETWORK_MAC = "N/A"
-NETWORK_IP = "N/A"
+NETWORK_SSID = "SSID: -"
+NETWORK_MAC = "Mac: -"
+NETWORK_IP = "IP: -"
 NETWORK_MSGS = []
+NETWORK_CONNECT_ATTEMPTS = 0
 
 API_CLASS: Api = None
 
@@ -23,6 +24,7 @@ MAIN_MENU: Menu = None
 GAME_MENU: Menu = None
 INFO_MENU: Menu = None
 ANIMATE_MENU: Menu = None
+OFFLINE_MENU: Menu = None
 
 
 API_BASE_URL = "http://10.10.0.10:8080"

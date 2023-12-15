@@ -1,6 +1,6 @@
 from library import atomics
 from library.action_class import ButtonAction
-from library.navigation import MainMenu
+from library.navigation import MainMenu, OfflineMenu
 
 
 class InfoMenuActions(ButtonAction):
@@ -10,6 +10,7 @@ class InfoMenuActions(ButtonAction):
 
     def long_press1(self):
         atomics.MAIN_MENU = MainMenu()
+        atomics.OFFLINE_MENU = OfflineMenu()
         atomics.STATE = "main_menu"
         atomics.INFO_MENU = None
 

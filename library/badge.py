@@ -8,7 +8,7 @@ from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
 from display_helper import WINKING_POTATO
-from library.navigation import MainMenu
+from library.navigation import MainMenu, OfflineMenu
 from library.networking import Networking, Api
 
 i2c_h = fu.init_i2c()
@@ -73,22 +73,52 @@ def configure_api():
 
 async def display_queue(display: Display):
     atomics.MAIN_MENU = MainMenu()
+    atomics.OFFLINE_MENU = OfflineMenu()
     first_menu = True
+    first_connection = False
     api_configured = False
     while True:
-        queue_item = QueueItem("text", data={
-            "message": [
-                " -- Offline -- "
-            ],
-            "delay": 50
-        })
-        can_queue = True
-        if atomics.NETWORK_CONNECTED == "connected":
+        if atomics.NETWORK_CONNECTED != "connected" or not api_configured:
+            if atomics.NETWORK_CONNECTED == "connected":
+                api_configured = configure_api()
+            if atomics.STATE == "main_menu":
+                # Other menus don't need to context switch
+                atomics.STATE = "offline_menu"
+            can_queue = first_menu
+            lines = []
+            if atomics.STATE == "offline_menu":
+                lines = atomics.OFFLINE_MENU.build_menu()
+                if atomics.OFFLINE_MENU.modified:
+                    can_queue = True
+                    atomics.OFFLINE_MENU.modified = False
+            elif atomics.STATE == "info_menu":
+                lines = atomics.INFO_MENU.build_menu()
+                lines.append(f"Tries: {atomics.NETWORK_CONNECT_ATTEMPTS}")
+                if atomics.INFO_MENU.modified:
+                    can_queue = True
+                    atomics.INFO_MENU.modified = False
+            elif atomics.STATE == "animate_menu":
+                lines = atomics.ANIMATE_MENU.build_menu()
+                if atomics.ANIMATE_MENU.modified:
+                    can_queue = True
+                    atomics.ANIMATE_MENU.modified = False
+            queue_item = QueueItem("text", data={
+                "message": lines
+            })
+            if can_queue:
+                display.queue_item(queue_item)
+                first_menu = False
+        elif atomics.NETWORK_CONNECTED == "connected":
             if not api_configured:
                 api_configured = configure_api()
                 continue
+            if atomics.STATE == "offline_menu":
+                atomics.STATE = "main_menu"  # Automatic context switching
             lines = []
             can_queue = first_menu
+            if not first_connection:
+                first_connection = True
+                can_queue = True
 
             # TODO: Abstract the menu generation
             # Ensure it's for menu's only, and abstraction doesn't
@@ -118,9 +148,9 @@ async def display_queue(display: Display):
             queue_item = QueueItem("text", data={
                 "message": lines
             })
-        if can_queue:
-            display.queue_item(queue_item)
-            first_menu = False
+            if can_queue:
+                display.queue_item(queue_item)
+                first_menu = False
         await asyncio.sleep_ms(30)
 
 

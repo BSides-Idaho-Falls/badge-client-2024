@@ -2,7 +2,7 @@ import display_helper
 from library import atomics
 from library.action_class import ButtonAction
 from library.display import QueueItem
-from library.navigation import MainMenu
+from library.navigation import MainMenu, OfflineMenu
 
 
 class AnimationMenuActions(ButtonAction):
@@ -18,6 +18,7 @@ class AnimationMenuActions(ButtonAction):
 
     def long_press1(self):
         atomics.MAIN_MENU = MainMenu()
+        atomics.OFFLINE_MENU = OfflineMenu()
         atomics.STATE = "main_menu"
         atomics.ANIMATE_MENU = None
 
