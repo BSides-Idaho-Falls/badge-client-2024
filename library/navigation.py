@@ -58,21 +58,21 @@ class MainMenu(Menu):
         self.header = "-- Main Menu --"
         self.selected_item: str = "info"
         self.menu_order = [
-            "info", "game", "potato"
+            "info", "game", "animate"
         ]
         self.actions = {
             "info": {
                 "message": "Info",
                 "next": "game",
-                "before": "potato"
+                "before": "animate"
             },
             "game": {
                 "message": "Game",
-                "next": "potato",
+                "next": "animate",
                 "before": "info"
             },
-            "potato": {
-                "message": "Potato",
+            "animate": {
+                "message": "Animations",
                 "next": "info",
                 "before": "game"
             },
@@ -129,23 +129,20 @@ class InfoMenu(Menu):
             i += 1
 
 
-class OfflineMenu(Menu):
+class AnimationMenu(Menu):
 
     def __init__(self):
         super().__init__()
-        self.menu_name = "offline"
-        self.header = " -- Offline -- "
-        self.selected_item: str = "nop"
-        self.menu_order = []
+        self.menu_name = "animations"
+        self.header = " -- Animate -- "
+        self.selected_item: str = "potato"
+        self.menu_order = [
+            "potato"
+        ]
         self.actions = {
-            "nop": {
-                "message": "NOP",
+            "potato": {
+                "message": "Potato",
                 "next": "potato",
                 "before": "potato"
-            },
-            "potato": {
-                "message": "NOP",
-                "next": "nop",
-                "before": "nop"
             }
         }

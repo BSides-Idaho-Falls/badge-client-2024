@@ -8,7 +8,7 @@ from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
 from display_helper import WINKING_POTATO
-from library.navigation import MainMenu, OfflineMenu
+from library.navigation import MainMenu
 from library.networking import Networking, Api
 
 i2c_h = fu.init_i2c()
@@ -110,6 +110,11 @@ async def display_queue(display: Display):
                 if atomics.INFO_MENU.modified:
                     can_queue = True
                     atomics.INFO_MENU.modified = False
+            elif atomics.STATE == "animate_menu":
+                lines = atomics.ANIMATE_MENU.build_menu()
+                if atomics.ANIMATE_MENU.modified:
+                    can_queue = True
+                    atomics.ANIMATE_MENU.modified = False
             queue_item = QueueItem("text", data={
                 "message": lines
             })

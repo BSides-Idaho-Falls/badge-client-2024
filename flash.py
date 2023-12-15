@@ -36,6 +36,7 @@ DIRS: List[str] = [
     "library/actions_game_menu.py",
     "library/actions_info_menu.py",
     "library/actions_main_menu.py",
+    "library/actions_animation_menu.py",
     "library/navigation.py",
     "library/fileio.py"
 ]
