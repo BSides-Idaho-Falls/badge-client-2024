@@ -3,7 +3,7 @@ import json
 import uasyncio as asyncio
 import gc
 import initialization as fu
-import library.button_actions_base as ba
+import library.button_trigger as ba
 from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
