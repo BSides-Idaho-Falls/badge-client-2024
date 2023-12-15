@@ -24,13 +24,18 @@ FILES: List[str] = [
 ]
 
 DIRS: List[str] = [
-    # "library/__init__.py",
+    "library/__init__.py",
     "library/atomics.py",
     "library/display.py",
     "library/networking.py",
-    # "library/buttons.py",
+    "library/buttons.py",
     "library/badge.py",
-    "library/button_actions_base.py",
+    "library/button_trigger.py",
+    "library/action_class.py",
+    "library/actions_game.py",
+    "library/actions_game_menu.py",
+    "library/actions_info_menu.py",
+    "library/actions_main_menu.py",
     "library/navigation.py",
     "library/fileio.py"
 ]
