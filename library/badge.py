@@ -89,6 +89,12 @@ async def display_queue(display: Display):
                 continue
             lines = []
             can_queue = first_menu
+
+            # TODO: Abstract the menu generation
+            # Ensure it's for menu's only, and abstraction doesn't
+            # attempt to override game visualization to prevent
+            # over-queueing
+
             if atomics.STATE == "main_menu":
                 lines = atomics.MAIN_MENU.build_menu()
                 if atomics.MAIN_MENU.modified:
