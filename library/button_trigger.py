@@ -28,6 +28,7 @@ def press0():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Short Press 0 has no function for this state")
+        return
     try:
         action.short_press0()
     except NotImplementedError:
@@ -41,6 +42,7 @@ def press1():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Short Press 1 has no function for this state")
+        return
     try:
         action.short_press1()
     except NotImplementedError:
@@ -54,6 +56,7 @@ def long_press0():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Long Press 0 has no function for this state")
+        return
     try:
         action.long_press0()
     except NotImplementedError:
@@ -67,6 +70,7 @@ def long_press1():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Long Press 1 has no function for this state")
+        return
     try:
         action.long_press1()
     except NotImplementedError:
@@ -80,6 +84,7 @@ def double_press0():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Double Press 0 has no function for this state")
+        return
     try:
         action.double_press0()
     except NotImplementedError:
@@ -93,6 +98,7 @@ def double_press1():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Double Press 1 has no function for this state")
+        return
     try:
         action.double_press1()
     except NotImplementedError:
