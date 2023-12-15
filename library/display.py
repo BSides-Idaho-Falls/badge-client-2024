@@ -109,6 +109,18 @@ class Display:
         if icon == "X":
             self.oled.line(x1, y1, x1 + 8, y1 + 8, 1)
             self.oled.line(x1, y1 + 8, x1 + 8, y1, 1)
+        if icon == "+":
+            self.oled.line(x1 + 4, y1, x1 + 4, y1 + 7, 1)
+            self.oled.line(x1, y1 + 4, x1 + 7, y1 + 4, 1)
+
+            self.oled.line(x1 + 3, y1, x1 + 3, y1 + 7, 1)
+            self.oled.line(x1, y1 + 3, x1 + 7, y1 + 3, 1)
+        if icon == "*":
+            self.oled.line(x1, y1, x1 + 7, y1 + 7, 1)
+            self.oled.line(x1, y1 + 7, x1 + 7, y1, 1)
+
+            self.oled.line(x1 + 4, y1, x1 + 4, y1 + 7, 1)
+            self.oled.line(x1, y1 + 4, x1 + 7, y1 + 4, 1)
 
     async def render_house(self, queue_item: QueueItem):
         self.oled.fill(0)
@@ -119,9 +131,13 @@ class Display:
         for item in construction:
             passable = item["passable"]
             loc = item["local_location"]
+            abs_loc = item["absolute_location"]
+            if abs_loc[0] == 0 and abs_loc[1] == 15:
+                self._local_grid_icon_coords(loc[0], loc[1], "*")
+                continue
             if not passable:
                 if item["material_type"] == "player":
-                    self._local_grid_icon_coords(loc[0], loc[1], "X")
+                    self._local_grid_icon_coords(loc[0], loc[1], "+")
                 else:
                     self._local_grid_fill_coords(loc[0], loc[1])
 
