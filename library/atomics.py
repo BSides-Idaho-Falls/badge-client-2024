@@ -1,3 +1,4 @@
+from library.actions_game import GameState
 from library.navigation import Menu
 from library.networking import Api
 
@@ -25,6 +26,7 @@ GAME_MENU: Menu = None
 INFO_MENU: Menu = None
 ANIMATE_MENU: Menu = None
 OFFLINE_MENU: Menu = None
+GAME_STATE: GameState = None
 
 
 API_BASE_URL = "http://10.10.0.10:8080"

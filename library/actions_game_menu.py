@@ -1,5 +1,6 @@
 from library import atomics
 from library.action_class import ButtonAction
+from library.actions_game import GameState
 from library.display import QueueItem
 from library.navigation import MainMenu
 
@@ -28,6 +29,7 @@ class GameMenuActions(ButtonAction):
             if success:
                 atomics.STATE = "game"
                 atomics.GAME_MENU = None
+                atomics.GAME_STATE = GameState()
 
     @staticmethod
     def enter_house():
