@@ -22,11 +22,6 @@ class Display:
         self.queue_frozen = False
         self.cached_render = None
 
-        self.LEFT = bytearray(b"\x00\x18<Z\x18\x18\x18\x00")
-        self.RIGHT = bytearray(b"\x00\x18\x18\x18Z<\x18\x00")
-        self.UP = bytearray(b"\x00\x08\x04~~\x04\x08\x00")
-        self.DOWN = bytearray(b"\x00\x10 ~~ \x10\x00")
-
     def queue_item(self, queue_item: QueueItem):
         # if self.queue_frozen:
         #     return
