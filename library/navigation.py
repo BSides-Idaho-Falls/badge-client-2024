@@ -1,5 +1,4 @@
 
-
 class Menu:
 
     def __init__(self):
@@ -8,13 +7,7 @@ class Menu:
         self.selected_item: str = "nop"
         self.menu_order = []
         self.modified = True
-        self.actions = {
-            "nop": {
-                "message": "NOP",
-                "next": "nop",
-                "before": "nop"
-            }
-        }
+        self.actions = {"nop": "NOP"}
 
     def increment_state(self):
         if "next" not in self.actions[self.selected_item]:
@@ -42,6 +35,10 @@ class Menu:
         lines = [] if not self.header else [self.header]
         for k in self.menu_order:
             item = self.actions[k]
+            if isinstance(item, str):
+                message = f"{'>' if k == self.selected_item else ' '} {item}"
+                lines.append(message)
+                continue
             if "hidden" in item and item["hidden"]:
                 continue
             message = f"{'>' if k == self.selected_item else ' '} {item['message']}"
@@ -73,21 +70,9 @@ class MainMenu(Menu):
             "info", "game", "animate"
         ]
         self.actions = {
-            "info": {
-                "message": "Info"
-            },
-            "game": {
-                "message": "Game"
-            },
-            "animate": {
-                "message": "Animations"
-            },
-            "none": {  # Prevents actions while in a locked state: DO NOT EDIT
-                "message": "",
-                "next": "info",  # If you get stuck in this state you can still increment
-                "before": "info",
-                "hidden": True
-            }
+            "info": "Info",
+            "game": "Game",
+            "animate": "Animations"
         }
 
 
@@ -102,18 +87,8 @@ class GameMenu(Menu):
             "enter", "rob"
         ]
         self.actions = {
-            "enter": {
-                "message": "Enter House"
-            },
-            "rob": {
-                "message": "Rob House"
-            },
-            "none": {  # Prevents actions while in a locked state: DO NOT EDIT
-                "message": "",
-                "next": "info",  # If you get stuck in this state you can still increment
-                "before": "info",
-                "hidden": True
-            }
+            "enter": "Enter House",
+            "rob": "Rob House"
         }
 
 
@@ -129,11 +104,7 @@ class InfoMenu(Menu):
         self.actions = {}
         for line in lines:
             self.menu_order.append(str(i))
-            self.actions[str(i)] = {
-                "message": line,
-                "next": "0",
-                "before": "0"
-            }
+            self.actions[str(i)] = line
             i += 1
 
 
@@ -148,13 +119,5 @@ class AnimationMenu(Menu):
             "potato"
         ]
         self.actions = {
-            "potato": {
-                "message": "Potato"
-            },
-            "none": {  # Prevents actions while in a locked state: DO NOT EDIT
-                "message": "",
-                "next": "info",  # If you get stuck in this state you can still increment
-                "before": "info",
-                "hidden": True
-            }
+            "potato": "Potato"
         }
