@@ -24,3 +24,12 @@ WINKING_POTATO = {
         )
     ]
 }
+
+
+ANIMATION_MAPPER = {
+    "potato": {
+        "contents": WINKING_POTATO,
+        "iterations": 3,
+        "frame_time_ms": 50
+    }
+}

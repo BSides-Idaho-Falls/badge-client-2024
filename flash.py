@@ -19,7 +19,7 @@ FILES: List[str] = [
     # "ssd1306.py",
     # "initialization.py",
     # "main.py",
-    #"display_helper.py",  # This takes a while to load, uncomment to load once
+    "display_helper.py",  # This takes a while to load, uncomment to load once
     #"secrets.py",  # Make sure to add this!
 ]
 
