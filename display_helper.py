@@ -24,3 +24,12 @@ WINKING_POTATO = {
         )
     ]
 }
+
+
+ANIMATION_MAPPER = {
+    "potato": {
+        "contents": WINKING_POTATO,
+        "iterations": 3,  # How many times should this animation be played? (Optional, default=1)
+        "frame_time_ms": 50  # How many ms should each frame show for? (Optional, default=3)
+    }
+}

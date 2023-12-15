@@ -141,19 +141,24 @@ class Networking:
         self.ip = None
         self.network_status = "disconnected"
 
-    def determine_wifi(self):
+    async def determine_wifi(self):
         for item in self.network_creds:
             self.wlan.active(True)
             ssid, password = item["ssid"], item["password"]
             print(f"Checking wifi ssid {ssid}...")
             self.wlan_handle = self.wlan.connect(ssid, password)
-            attempts_left = 5
-            while not self.wlan.isconnected() or attempts_left > 0:
+            attempts_left = 5 if atomics.NETWORK_CONNECT_ATTEMPTS < 3 else 6
+            while not self.wlan.isconnected() and attempts_left > 0:
                 attempts_left = attempts_left - 1
-                time.sleep(1)
+                print(f"Connect failed, retrying... {attempts_left}")
+                await asyncio.sleep_ms(900 if atomics.NETWORK_CONNECT_ATTEMPTS < 3 else 1750)
             if not self.wlan.isconnected():
                 print(f"Failed to connect to {ssid}")
+                atomics.NETWORK_CONNECT_ATTEMPTS += 1
+                if atomics.INFO_MENU:
+                    atomics.INFO_MENU.modified = True
                 continue
+            atomics.NETWORK_CONNECT_ATTEMPTS = 0
             wlan_mac = self.wlan.config('mac')
             self.mac = ubinascii.hexlify(wlan_mac).decode()
             self.ip = self.wlan.ifconfig()[0]
@@ -163,9 +168,10 @@ class Networking:
             return item
         return None
 
-    def connection(self):
+    async def connection(self):
         if not self.wifi_details:
-            if not self.determine_wifi():
+            await self.determine_wifi()
+            if not self.wifi_details:
                 return
         if not self.wlan.isconnected():
             self.network_status = "disconnected"
@@ -180,25 +186,26 @@ class Networking:
             self.mac = ubinascii.hexlify(wlan_mac).decode()
             self.ip = self.wlan.ifconfig()[0]
 
-    def tick(self):
-        self.connection()  # Test wifi connection, attempt reconnections
+    async def tick(self):
+        await self.connection()  # Test wifi connection, attempt reconnections
         self.update_wifi_atomics()
 
     def update_wifi_atomics(self):
         atomics.NETWORK_CONNECTED = self.network_status
         if not self.wifi_details:
-            atomics.NETWORK_SSID = "N/A"
-        atomics.NETWORK_SSID = self.wifi_details["ssid"]
+            atomics.NETWORK_SSID = "SSID: -"
+        else:
+            atomics.NETWORK_SSID = self.wifi_details["ssid"]
         if self.ip:
             atomics.NETWORK_IP = self.ip
+        else:
+            atomics.NETWORK_IP = "IP: -"
         if self.mac:
             atomics.NETWORK_MAC = self.mac
+        else:
+            atomics.NETWORK_MAC = "Mac: -"
 
     async def run(self):
         while True:
-            self.tick()
+            await self.tick()
             await asyncio.sleep_ms(500)
-
-
-
-

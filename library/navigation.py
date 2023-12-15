@@ -1,3 +1,4 @@
+from display_helper import ANIMATION_MAPPER
 
 
 class Menu:
@@ -8,20 +9,26 @@ class Menu:
         self.selected_item: str = "nop"
         self.menu_order = []
         self.modified = True
-        self.actions = {
-            "nop": {
-                "message": "NOP",
-                "next": "nop",
-                "before": "nop"
-            }
-        }
+        self.actions = {"nop": "NOP"}
 
     def increment_state(self):
+        if "next" not in self.actions[self.selected_item]:
+            indx = self.menu_order.index(self.selected_item)
+            new_indx = 0 if indx >= len(self.menu_order) - 1 else indx + 1
+            self.selected_item = self.menu_order[new_indx]
+            self.modified = True
+            return self.selected_item
         self.selected_item = self.actions[self.selected_item]["next"]
         self.modified = True
         return self.selected_item
 
     def decrement_state(self):
+        if "before" not in self.actions[self.selected_item]:
+            indx = self.menu_order.index(self.selected_item)
+            new_indx = len(self.menu_order) - 1 if indx == 0 else indx - 1
+            self.selected_item = self.menu_order[new_indx]
+            self.modified = True
+            return self.selected_item
         self.selected_item = self.actions[self.selected_item]["before"]
         self.modified = True
         return self.selected_item
@@ -30,6 +37,10 @@ class Menu:
         lines = [] if not self.header else [self.header]
         for k in self.menu_order:
             item = self.actions[k]
+            if isinstance(item, str):
+                message = f"{'>' if k == self.selected_item else ' '} {item}"
+                lines.append(message)
+                continue
             if "hidden" in item and item["hidden"]:
                 continue
             message = f"{'>' if k == self.selected_item else ' '} {item['message']}"
@@ -61,27 +72,25 @@ class MainMenu(Menu):
             "info", "game", "animate"
         ]
         self.actions = {
-            "info": {
-                "message": "Info",
-                "next": "game",
-                "before": "animate"
-            },
-            "game": {
-                "message": "Game",
-                "next": "animate",
-                "before": "info"
-            },
-            "animate": {
-                "message": "Animations",
-                "next": "info",
-                "before": "game"
-            },
-            "none": {  # Prevents actions while in a locked state
-                "message": "",
-                "next": "info",  # If you get stuck in this state you can still increment
-                "before": "info",
-                "hidden": True
-            }
+            "info": "Info",
+            "game": "Game",
+            "animate": "Animations"
+        }
+
+
+class OfflineMenu(Menu):
+
+    def __init__(self):
+        super().__init__()
+        self.menu_name = "offline_menu"
+        self.header = "-- Offline --"
+        self.selected_item: str = "info"
+        self.menu_order = [
+            "info", "animate"
+        ]
+        self.actions = {
+            "info": "Info",
+            "animate": "Animations"
         }
 
 
@@ -96,16 +105,8 @@ class GameMenu(Menu):
             "enter", "rob"
         ]
         self.actions = {
-            "enter": {
-                "message": "Enter House",
-                "next": "rob",
-                "before": "rob"
-            },
-            "rob": {
-                "message": "Rob House",
-                "next": "enter",
-                "before": "enter"
-            }
+            "enter": "Enter House",
+            "rob": "Rob House"
         }
 
 
@@ -121,11 +122,7 @@ class InfoMenu(Menu):
         self.actions = {}
         for line in lines:
             self.menu_order.append(str(i))
-            self.actions[str(i)] = {
-                "message": line,
-                "next": "0",
-                "before": "0"
-            }
+            self.actions[str(i)] = line
             i += 1
 
 
@@ -136,13 +133,9 @@ class AnimationMenu(Menu):
         self.menu_name = "animations"
         self.header = " -- Animate -- "
         self.selected_item: str = "potato"
-        self.menu_order = [
-            "potato"
-        ]
-        self.actions = {
-            "potato": {
-                "message": "Potato",
-                "next": "potato",
-                "before": "potato"
-            }
-        }
+        self.menu_order = [item for item in ANIMATION_MAPPER]
+        self.actions = {}
+        for item in ANIMATION_MAPPER:
+            chars = [c for c in item]
+            chars[0] = chars[0].upper()
+            self.actions[item] = "".join(chars)

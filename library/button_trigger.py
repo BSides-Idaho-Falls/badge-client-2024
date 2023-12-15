@@ -5,13 +5,15 @@ from library.actions_game import GameActions
 from library.actions_game_menu import GameMenuActions
 from library.actions_info_menu import InfoMenuActions
 from library.actions_main_menu import MainMenuActions
+from library.actions_offline_menu import OfflineMenuActions
 
 BUTTON_ACTION_MAPPER: dict = {
     "game": GameActions,
     "game_menu": GameMenuActions,
     "main_menu": MainMenuActions,
     "info_menu": InfoMenuActions,
-    "animate_menu": AnimationMenuActions
+    "animate_menu": AnimationMenuActions,
+    "offline_menu": OfflineMenuActions
 }
 
 
@@ -26,6 +28,7 @@ def press0():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Short Press 0 has no function for this state")
+        return
     try:
         action.short_press0()
     except NotImplementedError:
@@ -39,6 +42,7 @@ def press1():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Short Press 1 has no function for this state")
+        return
     try:
         action.short_press1()
     except NotImplementedError:
@@ -52,6 +56,7 @@ def long_press0():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Long Press 0 has no function for this state")
+        return
     try:
         action.long_press0()
     except NotImplementedError:
@@ -65,6 +70,7 @@ def long_press1():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Long Press 1 has no function for this state")
+        return
     try:
         action.long_press1()
     except NotImplementedError:
@@ -78,6 +84,7 @@ def double_press0():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Double Press 0 has no function for this state")
+        return
     try:
         action.double_press0()
     except NotImplementedError:
@@ -91,6 +98,7 @@ def double_press1():
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("Double Press 1 has no function for this state")
+        return
     try:
         action.double_press1()
     except NotImplementedError:
