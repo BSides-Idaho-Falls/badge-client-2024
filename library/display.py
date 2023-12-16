@@ -110,6 +110,12 @@ class Display:
         if icon == "X":
             self.oled.line(x1, y1, x1 + 8, y1 + 8, 1)
             self.oled.line(x1, y1 + 8, x1 + 8, y1, 1)
+        elif icon == "hollow_square":
+            x1, y1 = self._local_grid_start_coords(x, y)
+            x1 += 1
+            y1 += 1
+            self.oled.rect(x1, y1, self.GRID_WIDTH - 2, self.GRID_HEIGHT - 2, framebuf.MONO_HMSB)
+            self.oled.rect(x1 + 1, y1 + 1, self.GRID_WIDTH - 4, self.GRID_HEIGHT - 4, framebuf.MONO_HMSB)
         elif icon == "+":
             self.oled.line(x1 + 4, y1, x1 + 4, y1 + 7, 1)
             self.oled.line(x1, y1 + 4, x1 + 7, y1 + 4, 1)
@@ -196,7 +202,7 @@ class Display:
             loc = item["local_location"]
             abs_loc = item["absolute_location"]
             if abs_loc[0] == 0 and abs_loc[1] == 15:
-                self._local_grid_icon_coords(loc[0], loc[1], "*")
+                self._local_grid_icon_coords(loc[0], loc[1], "hollow_square")
                 continue
             if not passable:
                 if item["material_type"] == "player":
