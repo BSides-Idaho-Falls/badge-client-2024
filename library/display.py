@@ -178,7 +178,7 @@ class Display:
         for coord in coord_set:
             self.oled.pixel(coord[0], coord[1], 1)
 
-    async def render_house(self, queue_item: QueueItem = None):
+    async def render_house(self, queue_item: QueueItem):
         if not queue_item.data:
             queue_item = self.cached_render
         if not queue_item:

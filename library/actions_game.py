@@ -31,13 +31,13 @@ class GameActions(ButtonAction):
 
     def long_press1(self):
         GameActions.leave_house()
-        atomics.GAME_MENU = GameMenu()
-        atomics.GAME_STATE = None
-        atomics.STATE = "game_menu"
 
     @staticmethod
     def leave_house():
         atomics.API_CLASS.leave_house()
+        atomics.GAME_MENU = GameMenu()
+        atomics.GAME_STATE = None
+        atomics.STATE = "game_menu"
 
     @staticmethod
     def move_in_house(direction):
@@ -49,4 +49,8 @@ class GameActions(ButtonAction):
             data=response
         )
         atomics.DISPLAY.queue_item(queue_item)
+        player_location = response["player_location"]
+        x, y = player_location[0], player_location[1]
+        if x == 0 and y == 15:  # Walking back through the door :)
+            GameActions.leave_house()
         return True
