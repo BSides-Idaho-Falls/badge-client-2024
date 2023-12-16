@@ -39,10 +39,11 @@ DIRS: List[str] = [
     "library/actions_offline_menu.py",
     "library/actions_animation_menu.py",
     "library/navigation.py",
-    # "library/fileio.py"
+    "library/fileio.py"
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
+    "/dev/cu.usbmodem1401",  # Location behind USB hub on MacOS
     "/dev/cu.usbmodem101"  # Common location for MacOS
 ]
 

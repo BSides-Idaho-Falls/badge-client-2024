@@ -1,12 +1,13 @@
 import json
-import time
+
+import network
+import uasyncio as asyncio
+import ubinascii
+import urequests
+import urandom
+import hashlib
 
 import secrets
-import network
-import urequests
-import ubinascii
-import uasyncio as asyncio
-
 from library import atomics, fileio
 
 
@@ -19,10 +20,12 @@ class Api:
     def _make_request(self, method, url, headers=None, data=None):
         if data is None:
             data = {}
+        if headers is None:
+            headers = {}
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
-        response = urequests.request(method, url, headers=headers, data=data)
+        response = urequests.request(method, url, headers=headers, json=data)
         response_data = response.json()
         print(f"<-- {json.dumps(response_data)}")
         return response_data
@@ -86,9 +89,6 @@ class Api:
             self.in_house = False
         return response_data
 
-
-
-
     def create_house(self):
         if not atomics.NETWORK_MAC:
             print("Failed to create house because there's no network!")
@@ -109,6 +109,35 @@ class Api:
             db["house_id"] = atomics.API_HOUSE_ID
             fileio.write_local_data(db)
         return True
+
+    def attempt_self_register(self, auto_write=False):
+        if not atomics.NETWORK_MAC:
+            print("Failed to register because there's no network!")
+            return None
+        if not atomics.NETWORK_CONNECTED:
+            print("Failed to register because there's no network!")
+            return None
+        print(f"Registering with {atomics.NETWORK_MAC}")
+        player_id: str = atomics.NETWORK_MAC
+        letters = [c for c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"]
+        rand_stuff = [urandom.choice(letters) for i in range(0, 5)]
+        tmp = hashlib.sha1(f"{player_id}{rand_stuff}").digest()
+        registration_token = ubinascii.hexlify(tmp).decode()
+
+        body = {
+            "_id": registration_token,
+            "mac": player_id
+        }
+        url = f"{self.base_url}/api/self-register"
+        response_data = self._make_request("POST", url, data=body)
+        if response_data["success"]:
+            if auto_write:
+                local_data = fileio.get_local_data()
+                atomics.API_REGISTRATION_TOKEN = registration_token
+                local_data["registration_token"] = registration_token
+                fileio.write_local_data(local_data)
+            return registration_token
+        return None
 
     def create_player(self):
         if not atomics.NETWORK_MAC:
@@ -169,6 +198,9 @@ class Networking:
         return None
 
     async def connection(self):
+        wlan_mac = self.wlan.config('mac')
+        self.mac = ubinascii.hexlify(wlan_mac).decode()
+        atomics.NETWORK_MAC = self.mac
         if not self.wifi_details:
             await self.determine_wifi()
             if not self.wifi_details:
