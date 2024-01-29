@@ -73,7 +73,7 @@ def make_dir(location, dir_name):
 def start_flash(location: str, single_file: str = None):
     if single_file:
         print(f"Writing {single_file}")
-        os.system(f"ampy -p {location} put {single_file}")
+        os.system(f"ampy -p {location} put {single_file} /{single_file}")
         return
     print("Writing ", end="")
     i = 0

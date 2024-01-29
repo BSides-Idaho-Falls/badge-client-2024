@@ -75,9 +75,11 @@ class Display:
     async def display_text(self, queue_item: QueueItem):
         i = 0
         message = queue_item.data["message"]
-        self.oled.fill(0)
+        if not ("nofill" in queue_item.data and queue_item.data["nofill"]):
+            self.oled.fill(0)
         for item in message:
-            self.oled.text(item, 0, i)
+            if len(item) > 0:
+                self.oled.text(item, 0, i)
             i += 12
         self.oled.show()
         if "delay" in queue_item.data:
