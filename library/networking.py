@@ -1,4 +1,5 @@
 import json
+import random
 
 import network
 import uasyncio as asyncio
@@ -110,6 +111,35 @@ class Api:
             fileio.write_local_data(db)
         return True
 
+    def luhn_checksum(self, number: str) -> int:
+        numbers: list = [c for c in number]
+        total_sum: int = 0
+        for i, digit in enumerate(reversed(numbers)):
+            digit = int(digit)
+            if i % 2 == 1:
+                digit *= 2
+                if digit > 9:
+                    digit -= 9
+            total_sum += digit
+        checksum_digit = (10 - (total_sum % 10)) % 10
+        return checksum_digit
+
+    def check_luhn(self, number: str) -> bool:
+        try:
+            # Ensure number string is a valid number before passing to checksum
+            # Yes, argument is passed in via string and not integer ;)
+            int(number)
+        except ValueError as _:
+            return False
+        return self.luhn_checksum(number) == 0
+
+    def generate_luhn(self, size: int) -> str:
+        random_number: str = "".join([str(random.randint(0, 9)) for _ in range(size - 1)])
+        # 0 is not a typo, it's padding for the checksum
+        checksum_digit = self.luhn_checksum(f"{random_number}0")
+        luhn = f"{random_number}{checksum_digit}"
+        return luhn
+
     def attempt_self_register(self, auto_write=False):
         if not atomics.NETWORK_MAC:
             print("Failed to register because there's no network!")
@@ -117,12 +147,9 @@ class Api:
         if not atomics.NETWORK_CONNECTED:
             print("Failed to register because there's no network!")
             return None
-        print(f"Registering with {atomics.NETWORK_MAC}")
+        registration_token = self.generate_luhn(12)
+        print(f"Registering {atomics.NETWORK_MAC} with registration token {registration_token}")
         player_id: str = atomics.NETWORK_MAC
-        letters = [c for c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"]
-        rand_stuff = [urandom.choice(letters) for i in range(0, 5)]
-        tmp = hashlib.sha1(f"{player_id}{rand_stuff}").digest()
-        registration_token = ubinascii.hexlify(tmp).decode()
 
         body = {
             "_id": registration_token,
