@@ -20,6 +20,7 @@ class Display:
         self.GRID_WIDTH = 8
         self.GRID_HEIGHT = 8
         self.queue_frozen = False
+        self.cached_render = None
 
     def queue_item(self, queue_item: QueueItem):
         # if self.queue_frozen:
@@ -74,9 +75,11 @@ class Display:
     async def display_text(self, queue_item: QueueItem):
         i = 0
         message = queue_item.data["message"]
-        self.oled.fill(0)
+        if not ("nofill" in queue_item.data and queue_item.data["nofill"]):
+            self.oled.fill(0)
         for item in message:
-            self.oled.text(item, 0, i)
+            if len(item) > 0:
+                self.oled.text(item, 0, i)
             i += 12
         self.oled.show()
         if "delay" in queue_item.data:
@@ -109,20 +112,88 @@ class Display:
         if icon == "X":
             self.oled.line(x1, y1, x1 + 8, y1 + 8, 1)
             self.oled.line(x1, y1 + 8, x1 + 8, y1, 1)
-        if icon == "+":
+        elif icon == "hollow_square":
+            x1, y1 = self._local_grid_start_coords(x, y)
+            x1 += 1
+            y1 += 1
+            self.oled.rect(x1, y1, self.GRID_WIDTH - 2, self.GRID_HEIGHT - 2, framebuf.MONO_HMSB)
+            self.oled.rect(x1 + 1, y1 + 1, self.GRID_WIDTH - 4, self.GRID_HEIGHT - 4, framebuf.MONO_HMSB)
+        elif icon == "+":
             self.oled.line(x1 + 4, y1, x1 + 4, y1 + 7, 1)
             self.oled.line(x1, y1 + 4, x1 + 7, y1 + 4, 1)
 
             self.oled.line(x1 + 3, y1, x1 + 3, y1 + 7, 1)
             self.oled.line(x1, y1 + 3, x1 + 7, y1 + 3, 1)
-        if icon == "*":
+        elif icon == "*":
             self.oled.line(x1, y1, x1 + 7, y1 + 7, 1)
             self.oled.line(x1, y1 + 7, x1 + 7, y1, 1)
 
             self.oled.line(x1 + 4, y1, x1 + 4, y1 + 7, 1)
             self.oled.line(x1, y1 + 4, x1 + 7, y1 + 4, 1)
+        elif icon in ["left", "right", "up", "down"]:
+            self.draw_arrow(x1 + 2, y1 + 2, icon)
+
+    def draw_arrow(self, x, y, direction):
+        directions = {
+            "left": [
+                [x + 2, y],
+                [x + 1, y + 1],
+                [x, y + 2],
+                [x + 1, y + 2],
+                [x + 2, y + 2],
+                [x + 3, y + 2],
+                [x + 4, y + 2],
+                [x + 1, y + 3],
+                [x + 2, y + 4],
+            ],
+            "right": [
+                [x + 2, y],
+                [x + 3, y + 1],
+                [x, y + 2],
+                [x + 1, y + 2],
+                [x + 2, y + 2],
+                [x + 3, y + 2],
+                [x + 4, y + 2],
+                [x + 3, y + 3],
+                [x + 2, y + 4]
+            ],
+            "up": [
+                [x + 2, y],
+                [x + 2, y + 1],
+                [x + 2, y + 2],
+                [x + 2, y + 3],
+                [x + 2, y + 4],
+                [x, y + 2],
+                [x + 4, y + 2],
+                [x + 1, y + 1],
+                [x + 3, y + 1]
+            ],
+            "down": [
+                [x + 2, y],
+                [x + 2, y + 1],
+                [x + 2, y + 2],
+                [x + 2, y + 3],
+                [x + 2, y + 4],
+                [x, y + 2],
+                [x + 4, y + 2],
+                [x + 1, y + 3],
+                [x + 3, y + 3]
+            ]
+        }
+        if direction not in directions:
+            return
+        coord_set = directions[direction]
+        for coord in coord_set:
+            self.oled.pixel(coord[0], coord[1], 1)
 
     async def render_house(self, queue_item: QueueItem):
+        if not queue_item.data:
+            queue_item = self.cached_render
+        if not queue_item:
+            print("Uh oh, something went wrong rendering.")
+            return
+
+        self.cached_render = queue_item
         self.oled.fill(0)
 
         self.oled.rect(63, 0, 64, 64, 1)
@@ -133,17 +204,18 @@ class Display:
             loc = item["local_location"]
             abs_loc = item["absolute_location"]
             if abs_loc[0] == 0 and abs_loc[1] == 15:
-                self._local_grid_icon_coords(loc[0], loc[1], "*")
+                self._local_grid_icon_coords(loc[0], loc[1], "hollow_square")
                 continue
             if not passable:
                 if item["material_type"] == "player":
-                    self._local_grid_icon_coords(loc[0], loc[1], "+")
+                    self._local_grid_icon_coords(loc[0], loc[1], atomics.GAME_STATE.move_direction)
                 else:
                     self._local_grid_fill_coords(loc[0], loc[1])
 
         player_location = queue_item.data["player_location"]
         x, y = player_location[0], player_location[1]
-
-        self.oled.text(f"{x}, {y}", 0, 0)
+        x_str = f"0{x}" if x < 10 else str(x)
+        y_str = f"0{y}" if y < 10 else str(y)
+        self.oled.text(f"{x_str},{y_str}", 0, 0)
 
         self.oled.show()

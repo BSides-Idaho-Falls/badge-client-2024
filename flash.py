@@ -39,10 +39,11 @@ DIRS: List[str] = [
     "library/actions_offline_menu.py",
     "library/actions_animation_menu.py",
     "library/navigation.py",
-    # "library/fileio.py"
+    "library/fileio.py"
 ]
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
+    "/dev/cu.usbmodem1401",  # Location behind USB hub on MacOS
     "/dev/cu.usbmodem101"  # Common location for MacOS
 ]
 
@@ -72,7 +73,7 @@ def make_dir(location, dir_name):
 def start_flash(location: str, single_file: str = None):
     if single_file:
         print(f"Writing {single_file}")
-        os.system(f"ampy -p {location} put {single_file}")
+        os.system(f"ampy -p {location} put {single_file} /{single_file}")
         return
     print("Writing ", end="")
     i = 0

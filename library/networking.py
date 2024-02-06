@@ -1,12 +1,14 @@
 import json
-import time
+import random
+
+import network
+import uasyncio as asyncio
+import ubinascii
+import urequests
+import urandom
+import hashlib
 
 import secrets
-import network
-import urequests
-import ubinascii
-import uasyncio as asyncio
-
 from library import atomics, fileio
 
 
@@ -19,10 +21,12 @@ class Api:
     def _make_request(self, method, url, headers=None, data=None):
         if data is None:
             data = {}
+        if headers is None:
+            headers = {}
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
-        response = urequests.request(method, url, headers=headers, data=data)
+        response = urequests.request(method, url, headers=headers, json=data)
         response_data = response.json()
         print(f"<-- {json.dumps(response_data)}")
         return response_data
@@ -86,9 +90,6 @@ class Api:
             self.in_house = False
         return response_data
 
-
-
-
     def create_house(self):
         if not atomics.NETWORK_MAC:
             print("Failed to create house because there's no network!")
@@ -109,6 +110,61 @@ class Api:
             db["house_id"] = atomics.API_HOUSE_ID
             fileio.write_local_data(db)
         return True
+
+    def luhn_checksum(self, number: str) -> int:
+        numbers: list = [c for c in number]
+        total_sum: int = 0
+        for i, digit in enumerate(reversed(numbers)):
+            digit = int(digit)
+            if i % 2 == 1:
+                digit *= 2
+                if digit > 9:
+                    digit -= 9
+            total_sum += digit
+        checksum_digit = (10 - (total_sum % 10)) % 10
+        return checksum_digit
+
+    def check_luhn(self, number: str) -> bool:
+        try:
+            # Ensure number string is a valid number before passing to checksum
+            # Yes, argument is passed in via string and not integer ;)
+            int(number)
+        except ValueError as _:
+            return False
+        return self.luhn_checksum(number) == 0
+
+    def generate_luhn(self, size: int) -> str:
+        random_number: str = "".join([str(random.randint(0, 9)) for _ in range(size - 1)])
+        # 0 is not a typo, it's padding for the checksum
+        checksum_digit = self.luhn_checksum(f"{random_number}0")
+        luhn = f"{random_number}{checksum_digit}"
+        return luhn
+
+    def attempt_self_register(self, auto_write=False):
+        if not atomics.NETWORK_MAC:
+            print("Failed to register because there's no network!")
+            return None
+        if not atomics.NETWORK_CONNECTED:
+            print("Failed to register because there's no network!")
+            return None
+        registration_token = self.generate_luhn(12)
+        print(f"Registering {atomics.NETWORK_MAC} with registration token {registration_token}")
+        player_id: str = atomics.NETWORK_MAC
+
+        body = {
+            "_id": registration_token,
+            "mac": player_id
+        }
+        url = f"{self.base_url}/api/self-register"
+        response_data = self._make_request("POST", url, data=body)
+        if response_data["success"]:
+            if auto_write:
+                local_data = fileio.get_local_data()
+                atomics.API_REGISTRATION_TOKEN = registration_token
+                local_data["registration_token"] = registration_token
+                fileio.write_local_data(local_data)
+            return registration_token
+        return None
 
     def create_player(self):
         if not atomics.NETWORK_MAC:
@@ -169,6 +225,9 @@ class Networking:
         return None
 
     async def connection(self):
+        wlan_mac = self.wlan.config('mac')
+        self.mac = ubinascii.hexlify(wlan_mac).decode()
+        atomics.NETWORK_MAC = self.mac
         if not self.wifi_details:
             await self.determine_wifi()
             if not self.wifi_details:

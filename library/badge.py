@@ -28,7 +28,7 @@ def init_api():
     print(f"Read {json.dumps(data)}")
 
     # Required values
-    atomics.API_REGISTRATION_TOKEN = data["registration_token"]
+    atomics.API_REGISTRATION_TOKEN = data.get("registration_token", "")
 
     # Optional values
     atomics.API_TOKEN = data.get("api_token", "")
@@ -66,6 +66,10 @@ async def screen_updater(display: Display):
 
 
 def configure_api():
+    local_data = fileio.get_local_data()
+    if "registration_token" not in local_data or local_data["registration_token"] == "":
+        print("Attempting registration (id=1)")
+        atomics.API_CLASS.attempt_self_register(auto_write=True)
     s1 = atomics.API_CLASS.create_player()
     s2 = atomics.API_CLASS.create_house()
     return s1 and s2
