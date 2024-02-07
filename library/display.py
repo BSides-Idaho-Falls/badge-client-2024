@@ -199,6 +199,9 @@ class Display:
         self.oled.rect(63, 0, 64, 64, 1)
 
         construction: list = queue_item.data["construction"]
+        inside_house: str = queue_item.data["house_id"]
+        my_house_id: str = atomics.API_HOUSE_ID
+
         for item in construction:
             passable = item["passable"]
             loc = item["local_location"]
@@ -209,6 +212,8 @@ class Display:
             if not passable:
                 if item["material_type"] == "player":
                     self._local_grid_icon_coords(loc[0], loc[1], atomics.GAME_STATE.move_direction)
+                elif item["material_type"] == "Vault":
+                    self._local_grid_icon_coords(loc[0], loc[1], "X")
                 else:
                     self._local_grid_fill_coords(loc[0], loc[1])
 
@@ -216,6 +221,15 @@ class Display:
         x, y = player_location[0], player_location[1]
         x_str = f"0{x}" if x < 10 else str(x)
         y_str = f"0{y}" if y < 10 else str(y)
-        self.oled.text(f"{x_str},{y_str}", 0, 0)
+
+        self.oled.text(f"{x_str},{y_str}", 0, 0)  # Line 0
+        if inside_house == my_house_id:
+            build_action = "N/A"
+            if atomics.GAME_STATE:
+                build_action = atomics.GAME_STATE.build_action
+            self.oled.text("House:", 0, 15)
+            self.oled.text("Yours", 0, 23)
+            self.oled.text("Action:", 0, 31)
+            self.oled.text(build_action, 0, 39)
 
         self.oled.show()
