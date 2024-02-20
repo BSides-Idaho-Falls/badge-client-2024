@@ -30,11 +30,33 @@ class GameMenuActions(ButtonAction):
                 atomics.STATE = "game"
                 atomics.GAME_MENU = None
                 atomics.GAME_STATE = GameState()
+                atomics.GAME_STATE.own_house = True
+        if selected_item == "rob":
+            success = GameMenuActions.rob_house()
+            print(f"Enter/rob house success? {success}")
+            if success:
+                atomics.STATE = "game"
+                atomics.GAME_MENU = None
+                atomics.GAME_STATE = GameState()
+                atomics.GAME_STATE.own_house = False
 
     @staticmethod
     def enter_house():
         response = atomics.API_CLASS.enter_house()
         if not response["success"]:
+            return False
+        queue_item = QueueItem(
+            "render_house",
+            data=response
+        )
+        atomics.DISPLAY.queue_item(queue_item)
+        return True
+
+    @staticmethod
+    def rob_house():
+        response = atomics.API_CLASS.rob_house()
+        if not response or not response["success"]:
+            print(f"There are no houses available to rob!")
             return False
         queue_item = QueueItem(
             "render_house",

@@ -1,3 +1,5 @@
+import json
+
 import framebuf
 import uasyncio as asyncio
 
@@ -198,6 +200,8 @@ class Display:
 
         self.oled.rect(63, 0, 64, 64, 1)
 
+        own_house = atomics.GAME_STATE.own_house
+
         construction: list = queue_item.data["construction"]
         inside_house: str = queue_item.data["house_id"]
         my_house_id: str = atomics.API_HOUSE_ID
@@ -231,5 +235,8 @@ class Display:
             self.oled.text("Yours", 0, 23)
             self.oled.text("Action:", 0, 31)
             self.oled.text(build_action, 0, 39)
+        else:
+            self.oled.text("Robbing", 0, 15)
+            self.oled.text("House", 0, 23)
 
         self.oled.show()

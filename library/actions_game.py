@@ -10,6 +10,7 @@ class GameState:
         self.move_direction = "right"
         self.current_location = [0, 15]
         self.build_action = "build"  # build, clear, vault
+        self.own_house: bool = False
 
     def switch_build_action(self):
         actions = ["build", "clear", "vault"]
@@ -73,6 +74,12 @@ class GameActions(ButtonAction):
     def move_in_house(direction):
         response = atomics.API_CLASS.move(direction)
         if not response["success"]:
+            message = response.get("reason", "")
+            if message == "You are not in a house.":
+                print("You are no longer in a house! You have been kicked out.")
+                atomics.GAME_MENU = GameMenu()
+                atomics.GAME_STATE = None
+                atomics.STATE = "game_menu"
             return False
         queue_item = QueueItem(
             "render_house",

@@ -57,6 +57,13 @@ class Api:
         self.leave_house()
         return self.enter_house()
 
+    def rob_house_error_handler(self, response_data):
+        already_inside_message = "You are already in the house!"
+        if not ("reason" in response_data and response_data["reason"] == already_inside_message):
+            return response_data
+        self.leave_house()
+        return None
+
     def enter_house(self):
         if not atomics.NETWORK_MAC:
             print("Failed to enter house because there's no network!")
@@ -73,6 +80,22 @@ class Api:
             self.in_house = True
             return response_data
         return self.enter_house_error_handler(response_data)
+
+    def rob_house(self):
+        if not atomics.NETWORK_MAC:
+            print("Failed to rob house because there's no network!")
+            return None
+        if not atomics.API_PLAYER_ID:
+            print("Failed to rob house because there's no player")
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/rob_house"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response_data = self._make_request("POST", url, headers=headers)
+        if response_data["success"]:
+            self.in_house = True
+            return response_data
+        return self.rob_house_error_handler(response_data)
 
     def leave_house(self):
         if not atomics.NETWORK_MAC:
