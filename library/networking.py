@@ -46,7 +46,7 @@ class Api:
         headers = {
             "X-API-Token": atomics.API_TOKEN
         }
-        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/move/{direction}"
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/move/{direction}-c"
         response = self._make_request("POST", url, headers=headers)
         return response
 
@@ -73,7 +73,8 @@ class Api:
             return None
         url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/enter_house"
         headers = {
-            "X-API-Token": atomics.API_TOKEN
+            "X-API-Token": atomics.API_TOKEN,
+            "c": "y"
         }
         response_data = self._make_request("POST", url, headers=headers)
         if response_data["success"]:

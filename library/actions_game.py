@@ -54,11 +54,15 @@ class GameActions(ButtonAction):
         GameActions.leave_house()
 
     def long_press0(self):
+        if not atomics.GAME_STATE.own_house:
+            return
         print("Not yet implemented. Place block or move vault?")
         looking_at = atomics.GAME_STATE.looking_at()
         print(f"Looking at: {looking_at[0]}, {looking_at[1]}")
 
     def double_press1(self):
+        if not atomics.GAME_STATE.own_house:
+            return
         build_action = atomics.GAME_STATE.switch_build_action()
         print(f"Switched mode to: {build_action}")
         atomics.DISPLAY.queue_item(QueueItem("render_house"))

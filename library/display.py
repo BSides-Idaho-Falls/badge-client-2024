@@ -188,6 +188,24 @@ class Display:
         for coord in coord_set:
             self.oled.pixel(coord[0], coord[1], 1)
 
+    def compressed_render(self, data):
+        construction = data["construction"]
+        x: int = 0
+        y: int = 0
+        for item in construction:
+            if item == "1":
+                self._local_grid_fill_coords(y, x)
+            if item == "d":
+                self._local_grid_icon_coords(y, x, "hollow_square")
+            elif item == "p":
+                self._local_grid_icon_coords(y, x, atomics.GAME_STATE.move_direction)
+            elif item == "v":
+                self._local_grid_icon_coords(y, x, "X")
+            x += 1
+            if x >= 8:
+                x = 0
+                y += 1
+
     async def render_house(self, queue_item: QueueItem):
         if not queue_item.data:
             queue_item = self.cached_render
@@ -200,11 +218,15 @@ class Display:
 
         self.oled.rect(63, 0, 64, 64, 1)
 
-        own_house = atomics.GAME_STATE.own_house
-
-        construction: list = queue_item.data["construction"]
+        construction = queue_item.data["construction"]
         inside_house: str = queue_item.data["house_id"]
         my_house_id: str = atomics.API_HOUSE_ID
+        if not atomics.GAME_STATE:
+            return
+        if isinstance(construction, str):
+            self.compressed_render(queue_item.data)
+            self.post_render(queue_item, inside_house, my_house_id)
+            return
 
         for item in construction:
             passable = item["passable"]
@@ -221,6 +243,9 @@ class Display:
                 else:
                     self._local_grid_fill_coords(loc[0], loc[1])
 
+        self.post_render(queue_item, inside_house, my_house_id)
+
+    def post_render(self, queue_item, inside_house, my_house_id):
         player_location = queue_item.data["player_location"]
         x, y = player_location[0], player_location[1]
         x_str = f"0{x}" if x < 10 else str(x)
