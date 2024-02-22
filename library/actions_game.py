@@ -85,6 +85,14 @@ class GameActions(ButtonAction):
                 atomics.GAME_STATE = None
                 atomics.STATE = "game_menu"
             return False
+
+        if "robbed" in response and response["robbed"]:
+            dollars: int = response["contents"]["dollars"]
+            print(f"You robbed the house! You got {dollars} dollars.")
+            # House robbed successfully!
+            GameActions.leave_house()
+            return True
+
         queue_item = QueueItem(
             "render_house",
             data=response
