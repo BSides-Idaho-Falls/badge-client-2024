@@ -31,6 +31,43 @@ class Api:
         print(f"<-- {json.dumps(response_data)}")
         return response_data
 
+    def move_vault(self, x, y):
+        data: dict = {
+            "x": x,
+            "y": y
+        }
+        url = f"{self.base_url}/api/edit-house/{atomics.API_PLAYER_ID}/move-vault"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, headers=headers, data=data)
+        return response
+
+    def place_wall(self, x, y):
+        data: dict = {
+            "x": x,
+            "y": y,
+            "material_type": "Wooden_Wall"
+        }
+        url = f"{self.base_url}/api/edit-house/{atomics.API_PLAYER_ID}/build"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, headers=headers, data=data)
+        return response
+
+    def clear_wall(self, x, y):
+        data: dict = {
+            "x": x,
+            "y": y
+        }
+        url = f"{self.base_url}/api/edit-house/{atomics.API_PLAYER_ID}/clear"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("DELETE", url, headers=headers, data=data)
+        return response
+
     def move(self, direction):
         if direction not in ["left", "right", "up", "down"]:
             return None

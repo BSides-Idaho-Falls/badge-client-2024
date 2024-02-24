@@ -32,9 +32,9 @@ class GameState:
         if self.move_direction == "right":
             return [self.current_location[0] + 1, self.current_location[1]]
         if self.move_direction == "up":
-            return [self.current_location[0], self.current_location[1] - 1]
-        if self.move_direction == "down":
             return [self.current_location[0], self.current_location[1] + 1]
+        if self.move_direction == "down":
+            return [self.current_location[0], self.current_location[1] - 1]
         return None
 
 
@@ -56,9 +56,27 @@ class GameActions(ButtonAction):
     def long_press0(self):
         if not atomics.GAME_STATE.own_house:
             return
-        print("Not yet implemented. Place block or move vault?")
         looking_at = atomics.GAME_STATE.looking_at()
-        print(f"Looking at: {looking_at[0]}, {looking_at[1]}")
+        build_action = atomics.GAME_STATE.build_action  # build, clear, vault
+        x: int = looking_at[0]
+        y: int = looking_at[1]
+        print(f"Looking at: {x}, {y}")
+        response = {"success": False}
+        if build_action == "vault":
+            response = atomics.API_CLASS.move_vault(x, y)
+        if build_action == "build":
+            response = atomics.API_CLASS.place_wall(x, y)
+        if build_action == "clear":
+            response = atomics.API_CLASS.clear_wall(x, y)
+        if response["success"]:
+            queue_item = QueueItem(
+                "render_house",
+                data=response
+            )
+            atomics.DISPLAY.queue_item(queue_item)
+            player_location: list = response["player_location"] if "player_location" in response else []
+            x, y = player_location[0], player_location[1]
+            atomics.GAME_STATE.current_location = [x, y]
 
     def double_press1(self):
         if not atomics.GAME_STATE.own_house:
@@ -92,7 +110,6 @@ class GameActions(ButtonAction):
             # House robbed successfully!
             GameActions.leave_house()
             return True
-
         queue_item = QueueItem(
             "render_house",
             data=response
