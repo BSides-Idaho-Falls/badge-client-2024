@@ -256,12 +256,14 @@ class Display:
             build_action = "N/A"
             if atomics.GAME_STATE:
                 build_action = atomics.GAME_STATE.build_action
-            self.oled.text("House:", 0, 15)
-            self.oled.text("Yours", 0, 23)
-            self.oled.text("Action:", 0, 31)
-            self.oled.text(build_action, 0, 39)
+
+            wood_walls: int = queue_item.data.get("wood_walls", 0)
+
+            self.oled.text("Action:", 0, 15)
+            self.oled.text(build_action, 0, 23)
+            self.oled.text(f"Walls:", 0, 34)
+            self.oled.text(str(wood_walls), 0, 42)
         else:
             self.oled.text("Robbing", 0, 15)
-            self.oled.text("House", 0, 23)
 
         self.oled.show()
