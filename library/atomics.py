@@ -26,6 +26,7 @@ GAME_MENU: Menu = None
 INFO_MENU: Menu = None
 ANIMATE_MENU: Menu = None
 OFFLINE_MENU: Menu = None
+SHOP_MENU: Menu = None
 GAME_STATE: GameState = None
 
 

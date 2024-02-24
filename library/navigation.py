@@ -94,6 +94,33 @@ class OfflineMenu(Menu):
         }
 
 
+class ShopMenu(Menu):
+
+    def __init__(self):
+        super().__init__()
+        self.menu_name = "shop_menu"
+        self.header = "$? | ?"
+        self.selected_item: str = "buy"
+        self.menu_order = [
+            "buy", "sell"
+        ]
+        self.actions = {
+            "buy": "Buy Wall",
+            "sell": "Sell Wall"
+        }
+        self.dollars = 0
+        self.walls = 0
+
+    def update_header(self):
+        self.header = f"${self.dollars} | {self.walls}"
+
+    def build_menu(self, refresh=False):
+        if refresh:
+            self.update_header()
+        lines = super().build_menu()
+        return lines
+
+
 class GameMenu(Menu):
 
     def __init__(self):
@@ -102,11 +129,12 @@ class GameMenu(Menu):
         self.header = " - Game Menu - "
         self.selected_item: str = "enter"
         self.menu_order = [
-            "enter", "rob"
+            "enter", "rob", "shop"
         ]
         self.actions = {
             "enter": "Enter House",
-            "rob": "Rob House"
+            "rob": "Rob House",
+            "shop": "Shop"
         }
 
 

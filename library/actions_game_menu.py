@@ -2,7 +2,7 @@ from library import atomics
 from library.action_class import ButtonAction
 from library.actions_game import GameState
 from library.display import QueueItem
-from library.navigation import MainMenu
+from library.navigation import MainMenu, ShopMenu
 
 
 class GameMenuActions(ButtonAction):
@@ -31,7 +31,7 @@ class GameMenuActions(ButtonAction):
                 atomics.GAME_MENU = None
                 atomics.GAME_STATE = GameState()
                 atomics.GAME_STATE.own_house = True
-        if selected_item == "rob":
+        elif selected_item == "rob":
             success = GameMenuActions.rob_house()
             print(f"Enter/rob house success? {success}")
             if success:
@@ -39,6 +39,14 @@ class GameMenuActions(ButtonAction):
                 atomics.GAME_MENU = None
                 atomics.GAME_STATE = GameState()
                 atomics.GAME_STATE.own_house = False
+        elif selected_item == "shop":
+            atomics.STATE = "shop_menu"
+            atomics.GAME_MENU = None
+            atomics.SHOP_MENU = ShopMenu()
+            vault_contents: dict = atomics.API_CLASS.inquire_vault().get("vault", {})
+            atomics.SHOP_MENU.dollars = vault_contents["dollars"]
+            atomics.SHOP_MENU.walls = vault_contents["walls"]
+            atomics.SHOP_MENU.update_header()
 
     @staticmethod
     def enter_house():

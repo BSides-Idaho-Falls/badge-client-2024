@@ -6,6 +6,7 @@ from library.actions_game_menu import GameMenuActions
 from library.actions_info_menu import InfoMenuActions
 from library.actions_main_menu import MainMenuActions
 from library.actions_offline_menu import OfflineMenuActions
+from library.actions_shop_menu import ShopMenuActions
 
 BUTTON_ACTION_MAPPER: dict = {
     "game": GameActions,
@@ -13,7 +14,8 @@ BUTTON_ACTION_MAPPER: dict = {
     "main_menu": MainMenuActions,
     "info_menu": InfoMenuActions,
     "animate_menu": AnimationMenuActions,
-    "offline_menu": OfflineMenuActions
+    "offline_menu": OfflineMenuActions,
+    "shop_menu": ShopMenuActions
 }
 
 
@@ -27,12 +29,12 @@ def press0():
         return
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
-        print("Short Press 0 has no function for this state")
+        print(f"Short Press 0 has no function for this state | {atomics.STATE}")
         return
     try:
         action.short_press0()
     except NotImplementedError:
-        print("Short Press 0 has no function for this state")
+        print(f"Short Press 0 has no function for this state - {atomics.STATE}")
 
 
 def press1():

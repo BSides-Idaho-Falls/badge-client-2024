@@ -17,12 +17,15 @@ class Api:
     def __init__(self):
         self.base_url = atomics.API_BASE_URL
         self.in_house = False
+        self.headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
 
     def _make_request(self, method, url, headers=None, data=None):
         if data is None:
             data = {}
         if headers is None:
-            headers = {}
+            headers = self.headers
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
@@ -30,6 +33,56 @@ class Api:
         response_data = response.json()
         print(f"<-- {json.dumps(response_data)}")
         return response_data
+
+    def shop_buy_wall(self):
+        data: dict = {
+            "material": "Wooden_Wall",
+            "quantity": 1
+        }
+        url = f"{self.base_url}/api/shop/{atomics.API_PLAYER_ID}/purchase"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, data=data, headers=headers)
+        if not response["success"]:
+            return
+        if not atomics.SHOP_MENU:
+            return
+        vault: dict = response["vault"]
+        dollars: int = vault["dollars"]
+        walls: int = vault["materials"]["Wooden_Wall"]
+        atomics.SHOP_MENU.dollars = dollars
+        atomics.SHOP_MENU.walls = walls
+        atomics.SHOP_MENU.update_header()
+
+    def shop_sell_wall(self):
+        data: dict = {
+            "material": "Wooden_Wall",
+            "quantity": 1
+        }
+        url = f"{self.base_url}/api/shop/{atomics.API_PLAYER_ID}/sell"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, data=data, headers=headers)
+        if not response["success"]:
+            return
+        if not atomics.SHOP_MENU:
+            return
+        vault: dict = response["vault"]
+        dollars: int = vault["dollars"]
+        walls: int = vault["materials"]["Wooden_Wall"]
+        atomics.SHOP_MENU.dollars = dollars
+        atomics.SHOP_MENU.walls = walls
+        atomics.SHOP_MENU.update_header()
+
+    def inquire_vault(self):
+        url = f"{self.base_url}/api/house/{atomics.API_PLAYER_ID}/vault"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("GET", url, headers=headers)
+        return response
 
     def move_vault(self, x, y):
         data: dict = {
