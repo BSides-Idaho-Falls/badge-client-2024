@@ -97,7 +97,7 @@ async def display_queue(display: Display):
                     atomics.OFFLINE_MENU.modified = False
             elif atomics.STATE == "info_menu":
                 lines = atomics.INFO_MENU.build_menu()
-                lines.append(f"Tries: {atomics.NETWORK_CONNECT_ATTEMPTS}")
+                lines.insert(1, f"Tries: {atomics.NETWORK_CONNECT_ATTEMPTS}")
                 if atomics.INFO_MENU.modified:
                     can_queue = True
                     atomics.INFO_MENU.modified = False

@@ -25,3 +25,4 @@ class ShopMenuActions(ButtonAction):
             atomics.API_CLASS.shop_buy_wall()
         elif selected_item == "sell":
             atomics.API_CLASS.shop_sell_wall()
+        atomics.SHOP_MENU.modified = True
