@@ -180,7 +180,8 @@ class Api:
             print("Failed to rob house because there's no player")
         url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/rob_house"
         headers = {
-            "X-API-Token": atomics.API_TOKEN
+            "X-API-Token": atomics.API_TOKEN,
+            "c": "y"
         }
         response_data = self._make_request("POST", url, headers=headers)
         if response_data["success"]:
