@@ -42,6 +42,7 @@ class Display:
         self.queue_frozen = False
 
     async def run(self):
+        atomics.feed()
         if len(self.queue) < 1:
             await asyncio.sleep_ms(300)
             return
@@ -67,6 +68,7 @@ class Display:
         self.oled.fill(0)
         self.oled.blit(frame_buffer, 0, 0, 0)
         self.oled.show()
+        atomics.feed()
 
     async def display_image(self, queue_item: QueueItem):
         frame = queue_item.data["frame"]

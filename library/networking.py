@@ -21,7 +21,7 @@ class Api:
             "X-API-Token": atomics.API_TOKEN
         }
 
-    def _make_request(self, method, url, headers=None, data=None):
+    def _make_request(self, method, url, headers=None, data=None, retry=True):
         if data is None:
             data = {}
         if headers is None:
@@ -29,8 +29,15 @@ class Api:
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
-        response = urequests.request(method, url, headers=headers, json=data)
-        response_data = response.json()
+        try:
+            response = urequests.request(method, url, headers=headers, json=data)
+            response_data = response.json()
+        except OSError:
+            if retry:
+                print(f"Request failed, retrying!")
+                return self._make_request(method, url, headers=headers, data=data, retry=False)
+            print(f"Request failed, no response.")
+            return None
         print(f"<-- {json.dumps(response_data)}")
         return response_data
 
@@ -219,6 +226,9 @@ class Api:
             "X-API-Token": atomics.API_TOKEN
         }
         response_data = self._make_request("POST", url, headers=headers)
+        if not response_data:
+            print("Failed to create house, no response from server?")
+            return False
         if response_data["success"]:
             atomics.API_HOUSE_ID = response_data["house_id"]
             db = fileio.get_local_data()
@@ -291,6 +301,9 @@ class Api:
             "X-Register-Token": atomics.API_REGISTRATION_TOKEN
         }
         response_data = self._make_request("POST", url, headers=headers)
+        if not response_data:
+            print("Failed to create player, no response from server?")
+            return False
         if response_data["success"]:
             atomics.API_TOKEN = response_data["token"]
             atomics.API_PLAYER_ID = response_data["player_id"]
@@ -322,6 +335,7 @@ class Networking:
             while not self.wlan.isconnected() and attempts_left > 0:
                 attempts_left = attempts_left - 1
                 print(f"Connect failed, retrying... {attempts_left}")
+                atomics.feed()
                 await asyncio.sleep_ms(900 if atomics.NETWORK_CONNECT_ATTEMPTS < 3 else 1750)
             if not self.wlan.isconnected():
                 print(f"Failed to connect to {ssid}")
@@ -329,6 +343,7 @@ class Networking:
                 if atomics.INFO_MENU:
                     atomics.INFO_MENU.modified = True
                 continue
+            atomics.feed()
             atomics.NETWORK_CONNECT_ATTEMPTS = 0
             wlan_mac = self.wlan.config('mac')
             self.mac = ubinascii.hexlify(wlan_mac).decode()

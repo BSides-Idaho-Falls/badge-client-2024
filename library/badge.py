@@ -71,6 +71,8 @@ def configure_api():
         print("Attempting registration (id=1)")
         atomics.API_CLASS.attempt_self_register(auto_write=True)
     s1 = atomics.API_CLASS.create_player()
+    if not s1:
+        return False
     s2 = atomics.API_CLASS.create_house()
     return s1 and s2
 
@@ -82,6 +84,7 @@ async def display_queue(display: Display):
     first_connection = False
     api_configured = False
     while True:
+        atomics.feed()
         if atomics.NETWORK_CONNECTED != "connected" or not api_configured:
             if atomics.NETWORK_CONNECTED == "connected":
                 api_configured = configure_api()
