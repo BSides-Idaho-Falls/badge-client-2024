@@ -33,7 +33,6 @@ class GameMenuActions(ButtonAction):
                 atomics.GAME_STATE.own_house = True
         elif selected_item == "rob":
             success = GameMenuActions.rob_house()
-            print(f"Enter/rob house success? {success}")
             if success:
                 atomics.STATE = "game"
                 atomics.GAME_MENU = None
@@ -64,6 +63,12 @@ class GameMenuActions(ButtonAction):
     def rob_house():
         response = atomics.API_CLASS.rob_house()
         if not response or not response["success"]:
+            atomics.DISPLAY.queue_item(QueueItem("popup", {
+                "delay": 50,
+                "message": [
+                    "No houses", "to rob"
+                ]
+            }))
             print(f"There are no houses available to rob!")
             return False
         queue_item = QueueItem(

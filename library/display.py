@@ -57,6 +57,8 @@ class Display:
             await self.display_text(queue_item)
         elif queue_item.item_type == "render_house":
             await self.render_house(queue_item)
+        elif queue_item.item_type == "popup":
+            await self.display_popup(queue_item)
         await asyncio.sleep_ms(20)
 
     async def clear_screen(self):
@@ -73,6 +75,22 @@ class Display:
     async def display_image(self, queue_item: QueueItem):
         frame = queue_item.data["frame"]
         self._show_frame(frame)
+        if "delay" in queue_item.data:
+            await asyncio.sleep_ms(queue_item.data["delay"])
+
+    async def display_popup(self, queue_item: QueueItem):
+
+        self.oled.fill_rect(15, 15, 98, 34, 1)
+        message = queue_item.data["message"]
+        if isinstance(message, str):
+            self.oled.text(message, 18, 23, 0)
+        else:
+            y = 23
+            for line in message:
+                self.oled.text(line, 18, y, 0)
+                y += 8
+
+        self.oled.show()
         if "delay" in queue_item.data:
             await asyncio.sleep_ms(queue_item.data["delay"])
 

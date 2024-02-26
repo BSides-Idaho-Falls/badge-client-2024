@@ -77,6 +77,14 @@ class GameActions(ButtonAction):
             player_location: list = response["player_location"] if "player_location" in response else []
             x, y = player_location[0], player_location[1]
             atomics.GAME_STATE.current_location = [x, y]
+        else:
+            atomics.DISPLAY.queue_item(QueueItem("popup", {
+                "delay": 2100,
+                "message": [
+                    "Can't edit",
+                    f"selection"
+                ]
+            }))
 
     def double_press1(self):
         if not atomics.GAME_STATE.own_house:
@@ -107,6 +115,13 @@ class GameActions(ButtonAction):
         if "robbed" in response and response["robbed"]:
             dollars: int = response["contents"]["dollars"]
             print(f"You robbed the house! You got {dollars} dollars.")
+            atomics.DISPLAY.queue_item(QueueItem("popup", {
+                "delay": 2100,
+                "message": [
+                    "Success!",
+                    f"Won ${dollars}"
+                ]
+            }))
             # House robbed successfully!
             GameActions.leave_house()
             return True

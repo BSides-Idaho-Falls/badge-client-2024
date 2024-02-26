@@ -25,22 +25,24 @@ FILES: List[str] = [
 
 DIRS: List[str] = [
     "library/__init__.py",
-    "library/atomics.py",
-    "library/display.py",
-    "library/networking.py",
-    "library/buttons.py",
-    "library/badge.py",
-    "library/button_trigger.py",
     "library/action_class.py",
+    "library/actions_animation_menu.py",
     "library/actions_game.py",
     "library/actions_game_menu.py",
     "library/actions_info_menu.py",
     "library/actions_main_menu.py",
     "library/actions_offline_menu.py",
-    "library/actions_animation_menu.py",
+    "library/actions_shop_menu.py",
+    "library/atomics.py",
+    "library/badge.py",
+    "library/button_trigger.py",
+    "library/buttons.py",
+    "library/display.py",
+    "library/fileio.py",
     "library/navigation.py",
-    "library/fileio.py"
+    "library/networking.py"
 ]
+
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
     "/dev/cu.usbmodem1401",  # Location behind USB hub on MacOS

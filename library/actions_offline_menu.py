@@ -1,5 +1,6 @@
 from library import atomics
 from library.action_class import ButtonAction
+from library.display import QueueItem
 from library.navigation import InfoMenu, AnimationMenu
 
 
@@ -31,3 +32,8 @@ class OfflineMenuActions(ButtonAction):
             atomics.STATE = "animate_menu"
             atomics.OFFLINE_MENU = None
             atomics.MAIN_MENU = None
+        elif selected_item == "test":
+            atomics.DISPLAY.queue_item(QueueItem(
+                "popup",
+                {"message": "test", "delay": 100}
+            ))
