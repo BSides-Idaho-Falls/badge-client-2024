@@ -26,7 +26,7 @@ class OfflineMenuActions(ButtonAction):
                 atomics.NETWORK_MAC,
                 atomics.NETWORK_IP
             ]
-            atomics.INFO_MENU = atomics.INFO_MENU = InfoMenu(lines)
+            atomics.INFO_MENU = InfoMenu(lines)
         elif selected_item == "animate":
             atomics.ANIMATE_MENU = AnimationMenu()
             atomics.STATE = "animate_menu"
