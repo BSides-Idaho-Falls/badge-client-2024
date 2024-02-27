@@ -30,8 +30,13 @@ class MainMenuActions(ButtonAction):
                 atomics.NETWORK_MAC,
                 atomics.NETWORK_IP
             ]
-            atomics.INFO_MENU = atomics.INFO_MENU = InfoMenu(lines)
+            atomics.INFO_MENU = InfoMenu(lines)
         elif selected_item == "animate":
             atomics.ANIMATE_MENU = AnimationMenu()
             atomics.STATE = "animate_menu"
             atomics.MAIN_MENU = None
+        elif selected_item == "test":
+            atomics.DISPLAY.queue_item(QueueItem(
+                "popup",
+                {"message": "test", "delay": 100}
+            ))

@@ -1,4 +1,5 @@
 from display_helper import ANIMATION_MAPPER
+from library import atomics
 
 
 class Menu:
@@ -33,7 +34,7 @@ class Menu:
         self.modified = True
         return self.selected_item
 
-    def build_menu(self):
+    def build_menu(self, show_selector=True):
         lines = [] if not self.header else [self.header]
         for k in self.menu_order:
             item = self.actions[k]
@@ -43,7 +44,7 @@ class Menu:
                 continue
             if "hidden" in item and item["hidden"]:
                 continue
-            message = f"{'>' if k == self.selected_item else ' '} {item['message']}"
+            message = f"{'>' if k == self.selected_item and show_selector else ' '} {item['message']}"
             lines.append(message)
         final_lines = []
         max_lines = 4 if self.header else 5
@@ -94,6 +95,33 @@ class OfflineMenu(Menu):
         }
 
 
+class ShopMenu(Menu):
+
+    def __init__(self):
+        super().__init__()
+        self.menu_name = "shop_menu"
+        self.header = "$? | ?"
+        self.selected_item: str = "buy"
+        self.menu_order = [
+            "buy", "sell"
+        ]
+        self.actions = {
+            "buy": "Buy Wall",
+            "sell": "Sell Wall"
+        }
+        self.dollars = 0
+        self.walls = 0
+
+    def update_header(self):
+        self.header = f"${self.dollars} | {self.walls}"
+
+    def build_menu(self, refresh=False, show_selector=True):
+        if refresh:
+            self.update_header()
+        lines = super().build_menu()
+        return lines
+
+
 class GameMenu(Menu):
 
     def __init__(self):
@@ -102,11 +130,12 @@ class GameMenu(Menu):
         self.header = " - Game Menu - "
         self.selected_item: str = "enter"
         self.menu_order = [
-            "enter", "rob"
+            "enter", "rob", "shop"
         ]
         self.actions = {
             "enter": "Enter House",
-            "rob": "Rob House"
+            "rob": "Rob House",
+            "shop": "Shop"
         }
 
 
@@ -118,12 +147,37 @@ class InfoMenu(Menu):
         self.header = "  -- Info  --  "
         self.selected_item: str = ""
         self.menu_order = []
-        i = 0
+        self.lines = lines
         self.actions = {}
-        for line in lines:
-            self.menu_order.append(str(i))
-            self.actions[str(i)] = line
+        self.format_lines()
+
+    def format_lines(self):
+        i: int = 0
+        self.menu_order = []
+        self.actions = {}
+        for line in self.lines:
+            self.menu_order.append(f"a{i}")
+            self.actions[f"a{i}"] = line
             i += 1
+
+    def refresh_lines(self):
+        ip = atomics.NETWORK_IP if atomics.NETWORK_IP else "IP: -"
+        mac = atomics.NETWORK_MAC if atomics.NETWORK_MAC else "MAC: -"
+        ssid = atomics.NETWORK_SSID if atomics.NETWORK_SSID else "SSID: -"
+        self.lines = [
+            ssid, mac, ip
+        ]
+        if atomics.NETWORK_CONNECTED != "connected":
+            self.lines = [
+                "SSID: -", "MAC: -", "IP: -"
+            ]
+
+        self.format_lines()
+
+    def build_menu(self, show_selector=False):
+        self.refresh_lines()
+        lines = super().build_menu()
+        return lines
 
 
 class AnimationMenu(Menu):

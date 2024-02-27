@@ -1,3 +1,5 @@
+import json
+
 import framebuf
 import uasyncio as asyncio
 
@@ -40,6 +42,7 @@ class Display:
         self.queue_frozen = False
 
     async def run(self):
+        atomics.feed()
         if len(self.queue) < 1:
             await asyncio.sleep_ms(300)
             return
@@ -54,6 +57,8 @@ class Display:
             await self.display_text(queue_item)
         elif queue_item.item_type == "render_house":
             await self.render_house(queue_item)
+        elif queue_item.item_type == "popup":
+            await self.display_popup(queue_item)
         await asyncio.sleep_ms(20)
 
     async def clear_screen(self):
@@ -65,10 +70,27 @@ class Display:
         self.oled.fill(0)
         self.oled.blit(frame_buffer, 0, 0, 0)
         self.oled.show()
+        atomics.feed()
 
     async def display_image(self, queue_item: QueueItem):
         frame = queue_item.data["frame"]
         self._show_frame(frame)
+        if "delay" in queue_item.data:
+            await asyncio.sleep_ms(queue_item.data["delay"])
+
+    async def display_popup(self, queue_item: QueueItem):
+
+        self.oled.fill_rect(15, 15, 98, 34, 1)
+        message = queue_item.data["message"]
+        if isinstance(message, str):
+            self.oled.text(message, 18, 23, 0)
+        else:
+            y = 23
+            for line in message:
+                self.oled.text(line, 18, y, 0)
+                y += 8
+
+        self.oled.show()
         if "delay" in queue_item.data:
             await asyncio.sleep_ms(queue_item.data["delay"])
 
@@ -186,6 +208,24 @@ class Display:
         for coord in coord_set:
             self.oled.pixel(coord[0], coord[1], 1)
 
+    def compressed_render(self, data):
+        construction = data["construction"]
+        x: int = 0
+        y: int = 0
+        for item in construction:
+            if item == "1":
+                self._local_grid_fill_coords(y, x)
+            if item == "d":
+                self._local_grid_icon_coords(y, x, "hollow_square")
+            elif item == "p":
+                self._local_grid_icon_coords(y, x, atomics.GAME_STATE.move_direction)
+            elif item == "v":
+                self._local_grid_icon_coords(y, x, "X")
+            x += 1
+            if x >= 8:
+                x = 0
+                y += 1
+
     async def render_house(self, queue_item: QueueItem):
         if not queue_item.data:
             queue_item = self.cached_render
@@ -198,7 +238,16 @@ class Display:
 
         self.oled.rect(63, 0, 64, 64, 1)
 
-        construction: list = queue_item.data["construction"]
+        construction = queue_item.data["construction"]
+        inside_house: str = queue_item.data["house_id"]
+        my_house_id: str = atomics.API_HOUSE_ID
+        if not atomics.GAME_STATE:
+            return
+        if isinstance(construction, str):
+            self.compressed_render(queue_item.data)
+            self.post_render(queue_item, inside_house, my_house_id)
+            return
+
         for item in construction:
             passable = item["passable"]
             loc = item["local_location"]
@@ -209,13 +258,32 @@ class Display:
             if not passable:
                 if item["material_type"] == "player":
                     self._local_grid_icon_coords(loc[0], loc[1], atomics.GAME_STATE.move_direction)
+                elif item["material_type"] == "Vault":
+                    self._local_grid_icon_coords(loc[0], loc[1], "X")
                 else:
                     self._local_grid_fill_coords(loc[0], loc[1])
 
+        self.post_render(queue_item, inside_house, my_house_id)
+
+    def post_render(self, queue_item, inside_house, my_house_id):
         player_location = queue_item.data["player_location"]
         x, y = player_location[0], player_location[1]
         x_str = f"0{x}" if x < 10 else str(x)
         y_str = f"0{y}" if y < 10 else str(y)
-        self.oled.text(f"{x_str},{y_str}", 0, 0)
+
+        self.oled.text(f"{x_str},{y_str}", 0, 0)  # Line 0
+        if inside_house == my_house_id:
+            build_action = "N/A"
+            if atomics.GAME_STATE:
+                build_action = atomics.GAME_STATE.build_action
+
+            wood_walls: int = queue_item.data.get("wood_walls", 0)
+
+            self.oled.text("Action:", 0, 15)
+            self.oled.text(build_action, 0, 23)
+            self.oled.text(f"Walls:", 0, 34)
+            self.oled.text(str(wood_walls), 0, 42)
+        else:
+            self.oled.text("Robbing", 0, 15)
 
         self.oled.show()

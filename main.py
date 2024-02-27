@@ -1,10 +1,8 @@
 import uasyncio as asyncio
-import time
+from machine import WDT
 
-from library import badge
+from library import badge, atomics
 
 if __name__ == '__main__':
-    while True:
-        asyncio.run(badge.start_main())
-        print("Restarting main thread...")
-        time.sleep(1)
+    atomics.wdt = WDT(timeout=8388)
+    asyncio.run(badge.start_main())

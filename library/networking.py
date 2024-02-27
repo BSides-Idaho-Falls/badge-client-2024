@@ -10,6 +10,7 @@ import hashlib
 
 import secrets
 from library import atomics, fileio
+from library.display import QueueItem
 
 
 class Api:
@@ -17,19 +18,130 @@ class Api:
     def __init__(self):
         self.base_url = atomics.API_BASE_URL
         self.in_house = False
+        self.headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
 
-    def _make_request(self, method, url, headers=None, data=None):
+    def _make_request(self, method, url, headers=None, data=None, retry=True):
         if data is None:
             data = {}
         if headers is None:
-            headers = {}
+            headers = self.headers
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
-        response = urequests.request(method, url, headers=headers, json=data)
-        response_data = response.json()
+        try:
+            response = urequests.request(method, url, headers=headers, json=data)
+            response_data = response.json()
+        except OSError:
+            if retry:
+                print(f"Request failed, retrying!")
+                return self._make_request(method, url, headers=headers, data=data, retry=False)
+            print(f"Request failed, no response.")
+            return None
         print(f"<-- {json.dumps(response_data)}")
         return response_data
+
+    def shop_buy_wall(self):
+        data: dict = {
+            "material": "Wooden_Wall",
+            "quantity": 1
+        }
+        url = f"{self.base_url}/api/shop/{atomics.API_PLAYER_ID}/purchase"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, data=data, headers=headers)
+        if not response["success"]:
+            atomics.DISPLAY.queue_item(QueueItem("popup", {
+                "delay": 2100,
+                "message": [
+                    "Can't buy",
+                    f"wall"
+                ]
+            }))
+            return
+        if not atomics.SHOP_MENU:
+            return
+        vault: dict = response["vault"]
+        dollars: int = vault["dollars"]
+        walls: int = vault["materials"]["Wooden_Wall"]
+        atomics.SHOP_MENU.dollars = dollars
+        atomics.SHOP_MENU.walls = walls
+        atomics.SHOP_MENU.update_header()
+
+    def shop_sell_wall(self):
+        data: dict = {
+            "material": "Wooden_Wall",
+            "quantity": 1
+        }
+        url = f"{self.base_url}/api/shop/{atomics.API_PLAYER_ID}/sell"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, data=data, headers=headers)
+        if not response["success"]:
+            atomics.DISPLAY.queue_item(QueueItem("popup", {
+                "delay": 2100,
+                "message": [
+                    "Can't sell",
+                    f"wall"
+                ]
+            }))
+            return
+        if not atomics.SHOP_MENU:
+            return
+        vault: dict = response["vault"]
+        dollars: int = vault["dollars"]
+        walls: int = vault["materials"]["Wooden_Wall"]
+        atomics.SHOP_MENU.dollars = dollars
+        atomics.SHOP_MENU.walls = walls
+        atomics.SHOP_MENU.update_header()
+
+    def inquire_vault(self):
+        url = f"{self.base_url}/api/house/{atomics.API_PLAYER_ID}/vault"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("GET", url, headers=headers)
+        return response
+
+    def move_vault(self, x, y):
+        data: dict = {
+            "x": x,
+            "y": y
+        }
+        url = f"{self.base_url}/api/edit-house/{atomics.API_PLAYER_ID}/move-vault"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, headers=headers, data=data)
+        return response
+
+    def place_wall(self, x, y):
+        data: dict = {
+            "x": x,
+            "y": y,
+            "material_type": "Wooden_Wall"
+        }
+        url = f"{self.base_url}/api/edit-house/{atomics.API_PLAYER_ID}/build"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("POST", url, headers=headers, data=data)
+        return response
+
+    def clear_wall(self, x, y):
+        data: dict = {
+            "x": x,
+            "y": y
+        }
+        url = f"{self.base_url}/api/edit-house/{atomics.API_PLAYER_ID}/clear"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN
+        }
+        response = self._make_request("DELETE", url, headers=headers, data=data)
+        return response
 
     def move(self, direction):
         if direction not in ["left", "right", "up", "down"]:
@@ -46,16 +158,33 @@ class Api:
         headers = {
             "X-API-Token": atomics.API_TOKEN
         }
-        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/move/{direction}"
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/move/{direction}-c"
         response = self._make_request("POST", url, headers=headers)
         return response
 
     def enter_house_error_handler(self, response_data):
         already_inside_message = "You are already in the house!"
+        occupied_message = "Can't enter house at this time. Is someone there?"
+        if "reason" in response_data and response_data["reason"] == occupied_message:
+            atomics.DISPLAY.queue_item(QueueItem("popup", {
+                "delay": 2100,
+                "message": [
+                    "Uh oh! It's",
+                    "a robbery!"
+                ]
+            }))
+            return response_data
         if not ("reason" in response_data and response_data["reason"] == already_inside_message):
             return response_data
         self.leave_house()
         return self.enter_house()
+
+    def rob_house_error_handler(self, response_data):
+        already_inside_message = "You are already in the house!"
+        if not ("reason" in response_data and response_data["reason"] == already_inside_message):
+            return response_data
+        self.leave_house()
+        return None
 
     def enter_house(self):
         if not atomics.NETWORK_MAC:
@@ -66,13 +195,31 @@ class Api:
             return None
         url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/enter_house"
         headers = {
-            "X-API-Token": atomics.API_TOKEN
+            "X-API-Token": atomics.API_TOKEN,
+            "c": "y"
         }
         response_data = self._make_request("POST", url, headers=headers)
         if response_data["success"]:
             self.in_house = True
             return response_data
         return self.enter_house_error_handler(response_data)
+
+    def rob_house(self):
+        if not atomics.NETWORK_MAC:
+            print("Failed to rob house because there's no network!")
+            return None
+        if not atomics.API_PLAYER_ID:
+            print("Failed to rob house because there's no player")
+        url = f"{self.base_url}/api/game/{atomics.API_PLAYER_ID}/rob_house"
+        headers = {
+            "X-API-Token": atomics.API_TOKEN,
+            "c": "y"
+        }
+        response_data = self._make_request("POST", url, headers=headers)
+        if response_data["success"]:
+            self.in_house = True
+            return response_data
+        return self.rob_house_error_handler(response_data)
 
     def leave_house(self):
         if not atomics.NETWORK_MAC:
@@ -104,6 +251,9 @@ class Api:
             "X-API-Token": atomics.API_TOKEN
         }
         response_data = self._make_request("POST", url, headers=headers)
+        if not response_data:
+            print("Failed to create house, no response from server?")
+            return False
         if response_data["success"]:
             atomics.API_HOUSE_ID = response_data["house_id"]
             db = fileio.get_local_data()
@@ -176,6 +326,9 @@ class Api:
             "X-Register-Token": atomics.API_REGISTRATION_TOKEN
         }
         response_data = self._make_request("POST", url, headers=headers)
+        if not response_data:
+            print("Failed to create player, no response from server?")
+            return False
         if response_data["success"]:
             atomics.API_TOKEN = response_data["token"]
             atomics.API_PLAYER_ID = response_data["player_id"]
@@ -207,6 +360,7 @@ class Networking:
             while not self.wlan.isconnected() and attempts_left > 0:
                 attempts_left = attempts_left - 1
                 print(f"Connect failed, retrying... {attempts_left}")
+                atomics.feed()
                 await asyncio.sleep_ms(900 if atomics.NETWORK_CONNECT_ATTEMPTS < 3 else 1750)
             if not self.wlan.isconnected():
                 print(f"Failed to connect to {ssid}")
@@ -214,6 +368,7 @@ class Networking:
                 if atomics.INFO_MENU:
                     atomics.INFO_MENU.modified = True
                 continue
+            atomics.feed()
             atomics.NETWORK_CONNECT_ATTEMPTS = 0
             wlan_mac = self.wlan.config('mac')
             self.mac = ubinascii.hexlify(wlan_mac).decode()
