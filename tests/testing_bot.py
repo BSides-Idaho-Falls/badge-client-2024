@@ -1,3 +1,4 @@
+import datetime
 import json
 import time
 import uuid
@@ -70,7 +71,7 @@ def move_in_house(player_id, token, direction):
 
   response = requests.request("POST", url, headers=headers, data=payload)
 
-  print(response.text)
+  #print(response.text)
 
 
 TOKEN = register_player(player_id)
@@ -81,13 +82,28 @@ enter_house(player_id, TOKEN)
 move_in_house(player_id, TOKEN, "right-c")
 move_in_house(player_id, TOKEN, "right-c")
 direction = "right-c"
-for i in range(0, 240):
+intervals = (60 * 2) * 5000
+start = datetime.datetime.now()
+inverval_start = datetime.datetime.now()
+n = 0
+for i in range(0, intervals):
   move_in_house(player_id, TOKEN, direction)
   if direction == "right-c":
     direction = "left-c"
   else:
     direction = "right-c"
-  time.sleep(0.5)
+
+  interval_duration = datetime.datetime.now() - inverval_start
+  if interval_duration > datetime.timedelta(seconds=10):
+    inverval_start = datetime.datetime.now()
+    print(f"Intervals: {i}/{intervals} (+{n})")
+    n = -1
+  n += 1
+  #time.sleep(0.5)
+
+duration = datetime.datetime.now() - start
+print(f"Intervals: {intervals}")
+print(duration)
 
 leave_house(player_id, TOKEN)
 
