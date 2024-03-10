@@ -96,7 +96,7 @@ for i in range(0, intervals):
   interval_duration = datetime.datetime.now() - inverval_start
   if interval_duration > datetime.timedelta(seconds=10):
     inverval_start = datetime.datetime.now()
-    print(f"Intervals: {i}/{intervals} (+{n})")
+    print(f"Intervals: {i}/{intervals} (+{n} - {n * 6} / min))")
     n = -1
   n += 1
   #time.sleep(0.5)
