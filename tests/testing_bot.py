@@ -99,7 +99,7 @@ for i in range(0, intervals):
     print(f"Intervals: {i}/{intervals} (+{n} - {n * 6} / min))")
     n = -1
   n += 1
-  #time.sleep(0.5)
+  #time.sleep(0.1)
 
 duration = datetime.datetime.now() - start
 print(f"Intervals: {intervals}")
