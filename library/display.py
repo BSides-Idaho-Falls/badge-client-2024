@@ -272,6 +272,9 @@ class Display:
         y_str = f"0{y}" if y < 10 else str(y)
 
         self.oled.text(f"{x_str},{y_str}", 0, 0)  # Line 0
+        if not my_house_id or len(my_house_id) < 2:
+            print("You have an invalid house ID in db.json! Is it corrupt?")
+            print("Make sure you have {'house_id': '<your id>'} in db.json")
         if inside_house == my_house_id:
             build_action = "N/A"
             if atomics.GAME_STATE:

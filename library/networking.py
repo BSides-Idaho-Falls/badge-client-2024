@@ -353,6 +353,7 @@ class Networking:
     async def determine_wifi(self):
         for item in self.network_creds:
             self.wlan.active(True)
+            self.wlan.config(pm=0x00)  #self.wlan.config(pm=0xa11140)
             ssid, password = item["ssid"], item["password"]
             print(f"Checking wifi ssid {ssid}...")
             self.wlan_handle = self.wlan.connect(ssid, password)
