@@ -1,3 +1,26 @@
+"""
+This is where buttons get translated into actions.
+
+* action_forward()
+    - In menus, moves cursor down one item
+    - When in a house, moves player in the direction they're facing
+* action_backward()
+    - In menus, moves cursor up one item
+    - When in a house, changes the direction a player is facing
+* primary_select()
+    - In menus, enters or selects selected item
+    - When in a house, performs the selected action
+* secondary_select()
+    - When in a menu, goes back to parent menu.
+    - When in a house, leaves house
+* primary_modify()
+    - When in a house, changes selected action
+* secondary_modify()
+    - noop
+* hybrid_action_move(direction: str)  # left, right, up, down
+    - Combination of action_backward() and action_forward().
+    - When in a house, moves player <direction>
+"""
 from library import atomics
 from library.action_class import ButtonAction
 from library.actions_animation_menu import AnimationMenuActions
@@ -24,84 +47,98 @@ def create_instance(class_name):
     return instance() if class_name in BUTTON_ACTION_MAPPER else None
 
 
-def press0():
+def action_forward():
     if atomics.FREEZE_BUTTONS:
         return
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
-        print(f"Short Press 0 has no function for this state | {atomics.STATE}")
+        print(f"action_forward no function for this state | {atomics.STATE}")
         return
     try:
-        action.short_press0()
+        action.action_forward()
     except NotImplementedError:
-        print(f"Short Press 0 has no function for this state - {atomics.STATE}")
+        print(f"Extra action being attempted - {atomics.STATE}")
 
 
-def press1():
-    if atomics.FREEZE_BUTTONS:
-        return
-
-    action: ButtonAction = create_instance(atomics.STATE)
-    if not action:
-        print("Short Press 1 has no function for this state")
-        return
-    try:
-        action.short_press1()
-    except NotImplementedError:
-        print("Short Press 1 has no function for this state")
-
-
-def long_press0():
+def action_backward():
     if atomics.FREEZE_BUTTONS:
         return
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
-        print("Long Press 0 has no function for this state")
+        print("action_backward has no function for this state")
         return
     try:
-        action.long_press0()
+        action.action_backward()
     except NotImplementedError:
-        print("Long press 0 has no function for this state")
+        print(f"Extra action being attempted - {atomics.STATE}")
 
 
-def long_press1():
+def primary_select():
     if atomics.FREEZE_BUTTONS:
         return
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
-        print("Long Press 1 has no function for this state")
+        print("primary_select has no function for this state")
         return
     try:
-        action.long_press1()
+        action.primary_select()
     except NotImplementedError:
-        print("Long Press 1 has no function for this state")
+        print(f"Extra action being attempted - {atomics.STATE}")
 
 
-def double_press0():
+def secondary_select():
     if atomics.FREEZE_BUTTONS:
         return
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
-        print("Double Press 0 has no function for this state")
+        print("secondary_select has no function for this state")
         return
     try:
-        action.double_press0()
+        action.secondary_select()
     except NotImplementedError:
-        print("Double Press 0 has no function for this state")
+        print(f"Extra action being attempted - {atomics.STATE}")
 
 
-def double_press1():
+def secondary_modify():
     if atomics.FREEZE_BUTTONS:
         return
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
-        print("Double Press 1 has no function for this state")
+        print("secondary_modify has no function for this state")
         return
     try:
-        action.double_press1()
+        action.secondary_modify()
     except NotImplementedError:
-        print("Double Press 1 has no function for this state")
+        print(f"Extra action being attempted - {atomics.STATE}")
+
+
+def primary_modify():
+    if atomics.FREEZE_BUTTONS:
+        return
+
+    action: ButtonAction = create_instance(atomics.STATE)
+    if not action:
+        print("primary_modify has no function for this state")
+        return
+    try:
+        action.primary_modify()
+    except NotImplementedError:
+        print(f"Extra action being attempted - {atomics.STATE}")
+
+
+def hybrid_action_move(direction):
+    """This combines actions. It will change the direction the player looks, then move the player."""
+    if atomics.FREEZE_BUTTONS:
+        return
+
+    action: ButtonAction = create_instance(atomics.STATE)
+    if not action:
+        print("hybrid_action_move has no function for this state.")
+    try:
+        action.hybrid_action_move(direction)
+    except NotImplementedError:
+        print(f"Extra action being attempted - {atomics.STATE}")

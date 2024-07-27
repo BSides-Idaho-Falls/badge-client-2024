@@ -1,50 +1,43 @@
+import argparse
 import os
-import sys
 import time
 from typing import List, Optional
 
-# secrets.py sample:
-
-# CREDS = [
-#     {
-#         "ssid": "ssid",
-#         "password": "some-password-here"
-#     }
-# ]
-
 
 FILES: List[str] = [
-    # "boot.py",
-    # "i2c_eeprom.py",
-    # "ssd1306.py",
-    # "initialization.py",
-    # "main.py",
-    #"display_helper.py",  # This takes a while to load, uncomment to load once
-    #"secrets.py",  # Make sure to add this!
+    "boot.py",
+    "i2c_eeprom.py",
+    "ssd1306.py",
+    "initialization.py",
+    "main.py",
+    "display_helper.py",  # This takes a while to load, uncomment to load once
+    "secrets.py",  # Make sure to add this!
 ]
 
 DIRS: List[str] = [
-    "library/__init__.py",
-    "library/action_class.py",
-    "library/actions_animation_menu.py",
-    "library/actions_game.py",
-    "library/actions_game_menu.py",
-    "library/actions_info_menu.py",
-    "library/actions_main_menu.py",
-    "library/actions_offline_menu.py",
-    "library/actions_shop_menu.py",
-    "library/atomics.py",
-    "library/badge.py",
-    "library/button_trigger.py",
-    "library/buttons.py",
-    "library/display.py",
-    "library/fileio.py",
-    "library/navigation.py",
-    "library/networking.py"
+    "__init__.py",
+    "action_class.py",
+    "actions_animation_menu.py",
+    "actions_game.py",
+    "actions_game_menu.py",
+    "actions_info_menu.py",
+    "actions_main_menu.py",
+    "actions_offline_menu.py",
+    "actions_shop_menu.py",
+    "atomics.py",
+    "badge.py",
+    "button_trigger.py",
+    "buttons.py",
+    "display.py",
+    "fileio.py",
+    "light_handler.py",
+    "navigation.py",
+    "networking.py"
 ]
 
 
 POSSIBLE_DEVICE_LOCATIONS: List[str] = [
+    "/dev/ttyUSB0",  # Location for linux
     "/dev/cu.usbmodem1401",  # Location behind USB hub on MacOS
     "/dev/cu.usbmodem101"  # Common location for MacOS
 ]
@@ -58,10 +51,16 @@ def waitfor(seconds: int):
     print("")
 
 
-def detect_location() -> Optional[str]:
+def detect_location(device: Optional[str]) -> Optional[str]:
+    if device:
+        if os.path.exists(device):
+            return device
+        else:
+            print("Provided device location doesn't exist, attempting other locations.")
     for location in POSSIBLE_DEVICE_LOCATIONS:
         if os.path.exists(location):
             return location
+    print("No device found.")
     return None
 
 
@@ -72,57 +71,83 @@ def make_dir(location, dir_name):
         pass
 
 
-def start_flash(location: str, single_file: str = None):
-    if single_file:
-        print(f"Writing {single_file}")
-        os.system(f"ampy -p {location} put {single_file} /{single_file}")
+def write_single_file(location: str, file_name):
+    if "library/" in file_name:
+        # We'll add it back in if necessary
+        file_name = file_name.replace("library/", "")
+    if "." not in file_name:
+        # No extension? We'll assume .py
+        file_name = f"{file_name}.py"
+    prefix: str = "library/" if file_name in DIRS else ""
+    print(f"Writing file {file_name}")
+    os.system(f"ampy -p {location} put {prefix}{file_name} /{prefix}{file_name}")
+
+
+def write_files(args):
+    location: str = detect_location(args.device)
+    if not location:
         return
-    print("Writing ", end="")
-    i = 0
-    for file in FILES:
-        i += 1
-        print(file, end="")
-        if file != FILES[-1]:
-            print(", ", end="", flush=True)
-        if i > 0 and i % 5 == 0:
-            print("")
-        os.system(f"ampy -p {location} put {file}")
-    i = 0
-    for directory in DIRS:
-        i += 1
-        print(directory, end="")
-        if directory != DIRS[-1]:
-            print(", ", end="", flush=True)
-        if i > 0 and i % 5 == 0:
-            print("")
-        os.system(f"ampy -p {location} put {directory} /{directory}")
-
-    print("")
-
-
-def init():
-    location: Optional[str] = detect_location()
-    if location is None:
-        print("No badge location found!")
+    make_dir(location, "library")
+    if args.file:
+        write_single_file(location, args.file)
         return
-    print(f"Found location: {location}")
-    single_file: Optional[str] = None
-    loop: bool = "-loop" in sys.argv or "--loop" in sys.argv
-    if len(sys.argv) > 1:  # sys.argv[0] is the python script name itself
-        if "-loop" not in sys.argv[1] and "--loop" not in sys.argv[1]:
-            single_file = sys.argv[1]
-    if loop:
-        print("Looping flash write")
-        while True:
-            print("Starting flash...")
-            start_flash(location, single_file=single_file)
-            print("Complete! Disconnect badge before restarting")
-            waitfor(5)
-    else:
+    for file_name in DIRS:
+        write_single_file(location, file_name)
+    if not args.library:
+        for file_name in FILES:
+            write_single_file(location, file_name)
+
+
+def go(args):
+    if not args.loop:
+        write_files(args)
+        return
+    print("Looping flash write")
+    while True:
         print("Starting flash...")
-        start_flash(location, single_file=single_file)
-        print("Complete!")
+        write_files(args)
+        print("Complete! Disconnect badge before restarting")
+        waitfor(5)
+
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        prog='Badge Flasher',
+        description='Flashes files onto the badge!'
+    )
+    parser.add_argument(
+        '-l', '--loop', action='store_true', help='Flashes badges in a loop', default=False
+    )
+    parser.add_argument(
+        '-lb', '--library', action='store_true', help='Write only files in the library directory', default=False
+    )
+    parser.add_argument(
+        '-d', '--device', action='store', type=str, help='Device path to the badge (e.g. /dev/ttyUSB0', default=None
+    )
+    parser.add_argument(
+        '-f', '--file', action='store', type=str, help='Write only one file', default=None
+    )
+    parser.add_argument(
+        '-R', '--reset', action='store_true', help='FULL RESET. Deletes db.json & writes all files.', default=False
+    )
+    return parser.parse_args()
+
+
+def validate_args(args) -> bool:
+    if args.reset and args.file:
+        print("Can't supply both --file AND --reset")
+        return False
+    if args.file and args.library:
+        print("Can't supply both --file and --library")
+        return False
+    if args.reset and args.library:
+        print("Can't supply both --reset and --library")
+        return False
+    return True
 
 
 if __name__ == '__main__':
-    init()
+    args = get_args()
+    if not validate_args(args):
+        quit()
+    go(args)

@@ -8,7 +8,7 @@ class InfoMenuActions(ButtonAction):
     def __init__(self):
         super().__init__()
 
-    def long_press1(self):
+    def secondary_select(self):
         atomics.MAIN_MENU = MainMenu()
         atomics.OFFLINE_MENU = OfflineMenu()
         atomics.STATE = "main_menu"

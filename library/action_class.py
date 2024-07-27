@@ -5,20 +5,26 @@ class ButtonAction:
     def __init__(self):
         pass
 
-    def short_press0(self):
+    def action_forward(self):
         raise NotImplementedError()
 
-    def short_press1(self):
+    def action_backward(self):
         raise NotImplementedError()
 
-    def long_press0(self):
+    def primary_select(self):
         raise NotImplementedError()
 
-    def long_press1(self):
+    def secondary_select(self):
         raise NotImplementedError()
 
-    def double_press0(self):
+    def primary_modify(self):
         raise NotImplementedError()
 
-    def double_press1(self):
+    def secondary_modify(self):
         raise NotImplementedError()
+
+    def hybrid_action_move(self, direction: str):
+        raise NotImplementedError()
+
+
+
