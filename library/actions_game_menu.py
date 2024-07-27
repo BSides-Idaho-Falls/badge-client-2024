@@ -10,18 +10,18 @@ class GameMenuActions(ButtonAction):
     def __init__(self):
         super().__init__()
 
-    def short_press0(self):
+    def action_forward(self):
         atomics.GAME_MENU.increment_state()
 
-    def short_press1(self):
+    def action_backward(self):
         atomics.GAME_MENU.decrement_state()
 
-    def long_press1(self):
+    def secondary_select(self):
         atomics.MAIN_MENU = MainMenu()
         atomics.STATE = "main_menu"
         atomics.GAME_MENU = None
 
-    def long_press0(self):
+    def primary_select(self):
         selected_item = atomics.GAME_MENU.selected_item
         if selected_item == "enter":
             success = GameMenuActions.enter_house()

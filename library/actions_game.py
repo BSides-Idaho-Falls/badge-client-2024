@@ -19,8 +19,11 @@ class GameState:
         self.build_action = actions[new_indx]
         return self.build_action
 
-    def change_direction(self):
+    def change_direction(self, direction=None):
         directions = ["right", "down", "left", "up"]
+        if direction and direction in directions:
+            self.move_direction = direction
+            return self.move_direction
         indx = directions.index(self.move_direction)
         new_indx = 0 if indx >= len(directions) - 1 else indx + 1
         self.move_direction = directions[new_indx]
@@ -43,17 +46,22 @@ class GameActions(ButtonAction):
     def __init__(self):
         super().__init__()
 
-    def short_press0(self):
+    def hybrid_action_move(self, direction: str):
+        atomics.GAME_STATE.change_direction(direction=direction)
+        atomics.DISPLAY.queue_item(QueueItem("render_house"))
+        self.action_forward()
+
+    def action_forward(self):
         GameActions.move_in_house(atomics.GAME_STATE.move_direction)
 
-    def short_press1(self):
+    def action_backward(self):
         atomics.GAME_STATE.change_direction()
         atomics.DISPLAY.queue_item(QueueItem("render_house"))
 
-    def long_press1(self):
+    def secondary_select(self):
         GameActions.leave_house()
 
-    def long_press0(self):
+    def primary_select(self):
         if not atomics.GAME_STATE.own_house:
             return
         looking_at = atomics.GAME_STATE.looking_at()
@@ -86,7 +94,7 @@ class GameActions(ButtonAction):
                 ]
             }))
 
-    def double_press1(self):
+    def primary_modify(self):
         if not atomics.GAME_STATE.own_house:
             return
         build_action = atomics.GAME_STATE.switch_build_action()

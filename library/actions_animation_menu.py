@@ -10,19 +10,19 @@ class AnimationMenuActions(ButtonAction):
     def __init__(self):
         super().__init__()
 
-    def short_press0(self):
+    def action_forward(self):
         atomics.ANIMATE_MENU.increment_state()
 
-    def short_press1(self):
+    def action_backward(self):
         atomics.ANIMATE_MENU.decrement_state()
 
-    def long_press1(self):
+    def secondary_select(self):
         atomics.MAIN_MENU = MainMenu()
         atomics.OFFLINE_MENU = OfflineMenu()
         atomics.STATE = "main_menu"
         atomics.ANIMATE_MENU = None
 
-    def long_press0(self):
+    def primary_select(self):
         selected_item = atomics.ANIMATE_MENU.selected_item
         if selected_item not in display_helper.ANIMATION_MAPPER:
             # This could happen when we don't have locally stored animations in

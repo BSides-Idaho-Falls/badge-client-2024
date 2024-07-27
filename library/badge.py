@@ -17,8 +17,12 @@ oled_h = fu.init_oled(i2c_h)
 
 
 def init_btns():
+    # Initialize buttons from pins into buttons
     button1 = fu.machine.Pin(1, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
     button0 = fu.machine.Pin(0, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
+
+    # Initialize buttons into static variables in the atomics file.
+    # Allows detecting press, double-press & long-press
     atomics.PB0 = Pushbutton(button0, suppress=True)
     atomics.PB1 = Pushbutton(button1, suppress=True)
 
@@ -39,23 +43,35 @@ def init_api():
 
 
 async def btn_listener():
-    pb0 = atomics.PB0
-    pb1 = atomics.PB1
-    if not pb0 or not pb1:
+    # Grab the buttons as defined in init_btns
+    btn_right = atomics.PB0
+    btn_left = atomics.PB1
+    if not btn_right or not btn_left:
         print("Error init buttons")
         return
 
-    # press actions
-    pb0.release_func(ba.press0, ())
-    pb1.release_func(ba.press1, ())
+    # List of actions and what they do can be found in /library/button_trigger.py
 
-    # long press actions
-    pb0.long_func(ba.long_press0, ())
-    pb1.long_func(ba.long_press1, ())
+    # Short press btn_right -> action_forward
+    btn_right.release_func(ba.action_forward, ())
 
-    # double press actions
-    pb0.double_func(ba.double_press0, ())
-    pb1.double_func(ba.double_press1, ())
+    # Short press btn_left -> action_backward
+    btn_left.release_func(ba.action_backward, ())
+
+    # Long press btn_right -> primary_select
+    btn_right.long_func(ba.primary_select, ())
+
+    # Long press btn_left -> secondary_select
+    btn_left.long_func(ba.secondary_select, ())
+
+    # Double press btn_right -> secondary_modify
+    btn_right.double_func(ba.secondary_modify, ())
+
+    # Double press btn_left -> primary_modify
+    btn_left.double_func(ba.primary_modify, ())
+
+    # Hybrid actions also exist. For example, move a player right in their house
+    # example_btn_move_right.release_func(ba.hybrid_action_move, ("right"))
 
     await asyncio.sleep_ms(1000)
 
