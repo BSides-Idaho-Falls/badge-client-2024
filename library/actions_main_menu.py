@@ -2,7 +2,7 @@ import display_helper
 from library import atomics
 from library.action_class import ButtonAction
 from library.display import QueueItem
-from library.navigation import InfoMenu, GameMenu, AnimationMenu
+from library.navigation import InfoMenu, GameMenu, AnimationMenu, LightMenu
 
 
 class MainMenuActions(ButtonAction):
@@ -34,6 +34,10 @@ class MainMenuActions(ButtonAction):
         elif selected_item == "animate":
             atomics.ANIMATE_MENU = AnimationMenu()
             atomics.STATE = "animate_menu"
+            atomics.MAIN_MENU = None
+        elif selected_item == "lights":
+            atomics.LIGHT_MENU = LightMenu()
+            atomics.STATE = "light_menu"
             atomics.MAIN_MENU = None
         elif selected_item == "test":
             atomics.DISPLAY.queue_item(QueueItem(

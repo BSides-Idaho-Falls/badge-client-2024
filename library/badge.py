@@ -8,6 +8,7 @@ from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
 from display_helper import WINKING_POTATO
+from library.light_handler import Lights
 from library.navigation import MainMenu, OfflineMenu
 from library.networking import Networking, Api
 
@@ -93,6 +94,12 @@ def configure_api():
     return s1 and s2
 
 
+async def light_queue(lights: Lights):
+    while True:
+        atomics.feed()
+        await lights.run()
+
+
 async def display_queue(display: Display):
     atomics.MAIN_MENU = MainMenu()
     atomics.OFFLINE_MENU = OfflineMenu()
@@ -125,6 +132,11 @@ async def display_queue(display: Display):
                 if atomics.ANIMATE_MENU.modified:
                     can_queue = True
                     atomics.ANIMATE_MENU.modified = False
+            elif atomics.STATE == "light_menu":
+                lines = atomics.LIGHT_MENU.build_menu(refresh=True)
+                if atomics.LIGHT_MENU.modified:
+                    can_queue = True
+                    atomics.LIGHT_MENU.modified = False
             queue_item = QueueItem("text", data={
                 "message": lines
             })
@@ -184,6 +196,7 @@ async def display_queue(display: Display):
 
 async def start_main():
     atomics.DISPLAY = Display(oled_h)
+    atomics.LIGHTS = Lights()
     atomics.API_CLASS = Api()
     networking: Networking = Networking()
     init_btns()

@@ -34,7 +34,7 @@ class Menu:
         self.modified = True
         return self.selected_item
 
-    def build_menu(self, show_selector=True):
+    def build_menu(self, show_selector=True, refresh=False):
         lines = [] if not self.header else [self.header]
         for k in self.menu_order:
             item = self.actions[k]
@@ -75,6 +75,7 @@ class MainMenu(Menu):
         self.actions = {
             "info": "Info",
             "game": "Game",
+            "lights": "Lights",
             "animate": "Animations"
         }
 
@@ -87,10 +88,11 @@ class OfflineMenu(Menu):
         self.header = "-- Offline --"
         self.selected_item: str = "info"
         self.menu_order = [
-            "info", "animate"
+            "info", "lights", "animate"
         ]
         self.actions = {
             "info": "Info",
+            "lights": "Lights",
             "animate": "Animations"
         }
 
@@ -115,7 +117,7 @@ class ShopMenu(Menu):
     def update_header(self):
         self.header = f"${self.dollars} | {self.walls}"
 
-    def build_menu(self, refresh=False, show_selector=True):
+    def build_menu(self, show_selector=True, refresh=False):
         if refresh:
             self.update_header()
         lines = super().build_menu()
@@ -174,7 +176,7 @@ class InfoMenu(Menu):
 
         self.format_lines()
 
-    def build_menu(self, show_selector=False):
+    def build_menu(self, show_selector=False, refresh=False):
         self.refresh_lines()
         lines = super().build_menu()
         return lines
@@ -193,3 +195,22 @@ class AnimationMenu(Menu):
             chars = [c for c in item]
             chars[0] = chars[0].upper()
             self.actions[item] = "".join(chars)
+
+
+class LightMenu(Menu):
+
+    def __init__(self):
+        super().__init__()
+        self.menu_name = "lights"
+        self.header = " -- Lights -- "
+        self.selected_item: str = "off"
+        self.menu_order = ["off", "green", "blink", "adaptive"]
+        self.modified = True
+
+        # Todo: Figure out something smarter to do w/ the leds
+        self.actions = {
+            "off": "Off",
+            "green": "Green",
+            "blink": "Blink",
+            "adaptive": "Adaptive"  # React to elements in game
+        }

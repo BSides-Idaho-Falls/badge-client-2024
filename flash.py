@@ -21,6 +21,7 @@ DIRS: List[str] = [
     "actions_game.py",
     "actions_game_menu.py",
     "actions_info_menu.py",
+    "actions_light_menu.py",
     "actions_main_menu.py",
     "actions_offline_menu.py",
     "actions_shop_menu.py",
