@@ -201,6 +201,7 @@ async def start_main():
     networking: Networking = Networking()
     init_btns()
     asyncio.create_task(screen_updater(atomics.DISPLAY))
+    asyncio.create_task(light_queue(atomics.LIGHTS))
 
     atomics.DISPLAY.queue_item(QueueItem("animation", WINKING_POTATO, 30))
 

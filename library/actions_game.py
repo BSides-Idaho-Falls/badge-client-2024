@@ -1,6 +1,7 @@
 from library import atomics
 from library.action_class import ButtonAction
 from library.display import QueueItem
+from library.light_patterns import LightPatterns
 from library.navigation import GameMenu
 
 
@@ -90,9 +91,10 @@ class GameActions(ButtonAction):
                 "delay": 2100,
                 "message": [
                     "Can't edit",
-                    f"selection"
+                    "selection"
                 ]
             }))
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
 
     def primary_modify(self):
         if not atomics.GAME_STATE.own_house:
@@ -118,6 +120,7 @@ class GameActions(ButtonAction):
                 atomics.GAME_MENU = GameMenu()
                 atomics.GAME_STATE = None
                 atomics.STATE = "game_menu"
+                atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return False
 
         if "robbed" in response and response["robbed"]:

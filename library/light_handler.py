@@ -2,6 +2,7 @@ import uasyncio as asyncio
 import initialization as fu
 import neopixel
 from library import atomics
+from library.light_patterns import LightPatterns
 
 
 class LightQueue:
@@ -16,37 +17,32 @@ class LightQueue:
         if self.delay < 0.1:
             self.delay = 0.1
 
-    @staticmethod
-    def get_off_value():
-        return 0, 0, 0
-
-
-# async def neopixels():
-#     npin = fu.machine.Pin(6, fu.machine.Pin.OUT)
-#     np = neopixel.NeoPixel(npin, 3)
-#     while True:
-#         for i in range(0, 3):
-#             np[i] = fu.neopixels[i]
-#         np.write()
-#         await asyncio.sleep_ms(50)
 
 class Lights:
 
     def __init__(self):
         self.queue: list = []
         self.is_off = True
-        npin = fu.machine.Pin(atomics.NEOPIXEL_PIN, fu.machine.Pin.OUT)
-        self.np = neopixel.NeoPixel(npin, atomics.NEOPIXEL_COUNT)
+        self.is_adaptive = False
+        self.np = neopixel.NeoPixel(
+            fu.machine.Pin(atomics.NEOPIXEL_PIN, fu.machine.Pin.OUT),
+            atomics.NEOPIXEL_COUNT
+        )
 
     def queue_item(self, queue_item: LightQueue):
         if self.is_off:
             return
         self.queue.append(queue_item)
 
+    def adaptive_queue(self, queue_item: LightQueue):
+        if not self.is_adaptive:
+            return
+        self.queue_item(queue_item)
+
     def off(self):
         self.is_off = True
         self.clear_queue()
-        off_val = LightQueue.get_off_value()
+        off_val = LightPatterns.get_off_value()
         self.queue_item(LightQueue(led_left=off_val, led_center=off_val, led_right=off_val))
 
     def on(self, start_from: LightQueue = None):
@@ -67,10 +63,11 @@ class Lights:
 
     async def update_leds(self, light_queue: LightQueue):
         if light_queue.led_left:
-            print("Not yet implemented: Set left LED state")
+            self.np[0] = light_queue.led_left
         if light_queue.led_center:
-            print("Not yet implemented: Set center LED state")
+            self.np[1] = light_queue.led_center
         if light_queue.led_right:
-            print("Not yet implemented: Set right LED state")
+            self.np[2] = light_queue.led_right
+        self.np.write()
         await asyncio.sleep_ms(light_queue.delay)
 

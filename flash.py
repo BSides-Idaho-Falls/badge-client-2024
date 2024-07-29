@@ -32,6 +32,7 @@ DIRS: List[str] = [
     "display.py",
     "fileio.py",
     "light_handler.py",
+    "light_patterns.py",
     "navigation.py",
     "networking.py"
 ]

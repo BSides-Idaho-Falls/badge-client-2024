@@ -11,6 +11,7 @@ import hashlib
 import secrets
 from library import atomics, fileio
 from library.display import QueueItem
+from library.light_patterns import LightPatterns
 
 
 class Api:
@@ -60,6 +61,7 @@ class Api:
                     f"wall"
                 ]
             }))
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return
         if not atomics.SHOP_MENU:
             return
@@ -88,6 +90,7 @@ class Api:
                     f"wall"
                 ]
             }))
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return
         if not atomics.SHOP_MENU:
             return
@@ -173,6 +176,8 @@ class Api:
                     "a robbery!"
                 ]
             }))
+            # TODO: switch to red & blue flashing lights?
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return response_data
         if not ("reason" in response_data and response_data["reason"] == already_inside_message):
             return response_data
@@ -182,6 +187,7 @@ class Api:
     def rob_house_error_handler(self, response_data):
         already_inside_message = "You are already in the house!"
         if not ("reason" in response_data and response_data["reason"] == already_inside_message):
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return response_data
         self.leave_house()
         return None
