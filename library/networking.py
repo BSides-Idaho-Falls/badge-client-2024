@@ -31,6 +31,7 @@ class Api:
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
+        atomics.starve()
         try:
             response = urequests.request(method, url, headers=headers, json=data)
             response_data = response.json()
@@ -41,6 +42,7 @@ class Api:
             print(f"Request failed, no response.")
             return None
         print(f"<-- {json.dumps(response_data)}")
+        atomics.feed()
         return response_data
 
     def shop_buy_wall(self):
