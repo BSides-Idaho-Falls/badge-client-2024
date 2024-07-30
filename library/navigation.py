@@ -70,7 +70,7 @@ class MainMenu(Menu):
         self.header = "-- Main Menu --"
         self.selected_item: str = "info"
         self.menu_order = [
-            "info", "game", "animate"
+            "info", "game", "lights", "animate"
         ]
         self.actions = {
             "info": "Info",
