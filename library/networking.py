@@ -11,6 +11,7 @@ import hashlib
 import secrets
 from library import atomics, fileio
 from library.display import QueueItem
+from library.light_handler import LightPatterns, LightQueue
 
 
 class Api:
@@ -27,9 +28,17 @@ class Api:
             data = {}
         if headers is None:
             headers = self.headers
+        green = LightPatterns.get_by_color("green")
+        red = LightPatterns.get_by_color("red")
+        off = (0, 0, 0)
+        atomics.LIGHTS.adaptive_queue(LightQueue(red, red, red, delay=400))
+        # asyncio.run(
+        #     atomics.LIGHTS.execute_queue_item()
+        # )
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
+        atomics.starve()
         try:
             response = urequests.request(method, url, headers=headers, json=data)
             response_data = response.json()
@@ -40,6 +49,9 @@ class Api:
             print(f"Request failed, no response.")
             return None
         print(f"<-- {json.dumps(response_data)}")
+        atomics.feed()
+        atomics.LIGHTS.adaptive_queue(LightQueue(green, green, green, delay=400))
+        atomics.LIGHTS.adaptive_queue(LightQueue(off, off, off, delay=400))
         return response_data
 
     def shop_buy_wall(self):
@@ -60,6 +72,7 @@ class Api:
                     f"wall"
                 ]
             }))
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return
         if not atomics.SHOP_MENU:
             return
@@ -88,6 +101,7 @@ class Api:
                     f"wall"
                 ]
             }))
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return
         if not atomics.SHOP_MENU:
             return
@@ -173,6 +187,8 @@ class Api:
                     "a robbery!"
                 ]
             }))
+            # TODO: switch to red & blue flashing lights?
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return response_data
         if not ("reason" in response_data and response_data["reason"] == already_inside_message):
             return response_data
@@ -182,6 +198,7 @@ class Api:
     def rob_house_error_handler(self, response_data):
         already_inside_message = "You are already in the house!"
         if not ("reason" in response_data and response_data["reason"] == already_inside_message):
+            atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return response_data
         self.leave_house()
         return None
