@@ -2,13 +2,12 @@
 from library.actions_game import GameState
 from library.navigation import Menu
 from library.networking import Api
-import initialization as fu
 import machine
 
 API_BASE_URL = "https://api-bsides.meecles.io"
 NEOPIXEL_PIN = 6
 NEOPIXEL_COUNT = 3
-WDT_ENABLED: bool = True  # Enable watchdog?
+WDT_ENABLED: bool = True
 
 # The values immediately below are for button initialization.
 # If you rename them, you will also need to adjust these values in
