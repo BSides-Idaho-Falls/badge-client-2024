@@ -1,8 +1,7 @@
 from library import atomics
 from library.action_class import ButtonAction
 from library.display import QueueItem
-from library.light_handler import LightQueue
-from library.light_patterns import LightPatterns
+from library.light_handler import LightQueue, LightPatterns
 from library.navigation import MainMenu
 
 
@@ -12,10 +11,10 @@ class LightMenuActions(ButtonAction):
         super().__init__()
 
     def action_forward(self):
-        atomics.ANIMATE_MENU.increment_state()
+        atomics.LIGHT_MENU.increment_state()
 
     def action_backward(self):
-        atomics.ANIMATE_MENU.decrement_state()
+        atomics.LIGHT_MENU.decrement_state()
 
     def primary_select(self):
         selected_item: str = atomics.LIGHT_MENU.selected_item
@@ -27,6 +26,12 @@ class LightMenuActions(ButtonAction):
             green = LightPatterns.get_by_color("green")
             atomics.LIGHTS.queue_item(
                 LightQueue(led_left=green, led_center=green, led_right=green)
+            )
+            return
+        if selected_item == "blue":
+            blue = LightPatterns.get_by_color("blue")
+            atomics.LIGHTS.queue_item(
+                LightQueue(led_left=blue, led_center=blue, led_right=blue)
             )
             return
         if selected_item == "blink":
@@ -43,6 +48,7 @@ class LightMenuActions(ButtonAction):
                     enable_msg
                 ]
             }))
+            self.modified = True
 
     def secondary_select(self):
         atomics.MAIN_MENU = MainMenu()

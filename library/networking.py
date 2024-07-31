@@ -11,7 +11,7 @@ import hashlib
 import secrets
 from library import atomics, fileio
 from library.display import QueueItem
-from library.light_patterns import LightPatterns
+from library.light_handler import LightPatterns, LightQueue
 
 
 class Api:
@@ -28,6 +28,13 @@ class Api:
             data = {}
         if headers is None:
             headers = self.headers
+        green = LightPatterns.get_by_color("green")
+        red = LightPatterns.get_by_color("red")
+        off = (0, 0, 0)
+        atomics.LIGHTS.adaptive_queue(LightQueue(red, red, red, delay=400))
+        # asyncio.run(
+        #     atomics.LIGHTS.execute_queue_item()
+        # )
         print(f"--> URL: {method} {url}")
         print(f"--> Headers: {json.dumps(headers)}")
         print(f"--> Payload: {json.dumps(data)}")
@@ -43,6 +50,8 @@ class Api:
             return None
         print(f"<-- {json.dumps(response_data)}")
         atomics.feed()
+        atomics.LIGHTS.adaptive_queue(LightQueue(green, green, green, delay=400))
+        atomics.LIGHTS.adaptive_queue(LightQueue(off, off, off, delay=400))
         return response_data
 
     def shop_buy_wall(self):

@@ -204,13 +204,14 @@ class LightMenu(Menu):
         self.menu_name = "lights"
         self.header = " -- Lights -- "
         self.selected_item: str = "off"
-        self.menu_order = ["off", "green", "blink", "adaptive"]
+        self.menu_order = ["off", "green", "blue", "blink", "adaptive"]
         self.modified = True
 
         # Todo: Figure out something smarter to do w/ the leds
         self.actions = {
             "off": "Off",
             "green": "Green",
+            "blue": "Blue",
             "blink": "Blink",
             "adaptive": "Adaptive"  # React to elements in game
         }

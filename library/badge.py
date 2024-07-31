@@ -175,6 +175,11 @@ async def display_queue(display: Display):
                 if atomics.SHOP_MENU.modified:
                     can_queue = True
                     atomics.SHOP_MENU.modified = False
+            elif atomics.STATE == "light_menu":
+                lines = atomics.LIGHT_MENU.build_menu()
+                if atomics.LIGHT_MENU.modified:
+                    can_queue = True
+                    atomics.LIGHT_MENU.modified = False
             elif atomics.STATE == "info_menu":
                 lines = atomics.INFO_MENU.build_menu()
                 if atomics.INFO_MENU.modified:

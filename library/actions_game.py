@@ -1,7 +1,7 @@
 from library import atomics
 from library.action_class import ButtonAction
 from library.display import QueueItem
-from library.light_patterns import LightPatterns
+from library.light_handler import LightPatterns
 from library.navigation import GameMenu
 
 

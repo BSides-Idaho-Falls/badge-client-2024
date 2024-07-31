@@ -27,6 +27,7 @@ from library.actions_animation_menu import AnimationMenuActions
 from library.actions_game import GameActions
 from library.actions_game_menu import GameMenuActions
 from library.actions_info_menu import InfoMenuActions
+from library.actions_light_menu import LightMenuActions
 from library.actions_main_menu import MainMenuActions
 from library.actions_offline_menu import OfflineMenuActions
 from library.actions_shop_menu import ShopMenuActions
@@ -36,6 +37,7 @@ BUTTON_ACTION_MAPPER: dict = {
     "game_menu": GameMenuActions,
     "main_menu": MainMenuActions,
     "info_menu": InfoMenuActions,
+    "light_menu": LightMenuActions,
     "animate_menu": AnimationMenuActions,
     "offline_menu": OfflineMenuActions,
     "shop_menu": ShopMenuActions

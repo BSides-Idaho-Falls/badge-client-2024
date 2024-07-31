@@ -3,11 +3,12 @@ from library.actions_game import GameState
 from library.navigation import Menu
 from library.networking import Api
 import initialization as fu
+import machine
 
 API_BASE_URL = "https://api-bsides.meecles.io"
 NEOPIXEL_PIN = 6
 NEOPIXEL_COUNT = 3
-WDT_ENABLED: bool = False  # Enable watchdog?
+WDT_ENABLED: bool = True  # Enable watchdog?
 
 # The values immediately below are for button initialization.
 # If you rename them, you will also need to adjust these values in
@@ -60,10 +61,11 @@ def feed():
         wdt.feed()
     else:
         if WDT_ENABLED:
-            wdt = fu.machine.WDT(timeout=8388)
+            wdt = machine.WDT(timeout=3000)
 
 
 def starve():
     global wdt
     if wdt:
-        fu.machine.mem32[0x40058000] = fu.machine.mem32[0x40058000] & ~(1 << 30)
+        machine.mem32[0x40058000] = machine.mem32[0x40058000] & ~(1 << 30)
+        wdt = None
