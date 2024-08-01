@@ -25,11 +25,30 @@ WINKING_POTATO = {
     ]
 }
 
+KONAMI_LOGO = {
+    "sequence": [0],
+    "frames": [
+        bytearray(
+            b"\x00\x18\x00\x00x\x00\x00\xf8\x00\x01\xf8\x00\x01"
+            b"\xf8`\x01\xf9\xe0\x03\xfb\xe0\x03\xc7\xe0\x07\x07"
+            b"\xe0\x0e\x07\xe0>\x0f\xe0\xfe\x0f\x00\xfc\x1c\x00"
+            b"\xfc8\x00\xfc\xf8\x00\xfb\xf8\x00\xe3\xf0\x00\x83"
+            b"\xf0\x00\x03\xf0\x00\x03\xe0\x00\x03\x80\x00\x02"
+            b"\x00\x00"
+        )
+    ]
+}
+
 
 ANIMATION_MAPPER = {
     "potato": {
         "contents": WINKING_POTATO,
         "iterations": 3,  # How many times should this animation be played? (Optional, default=1)
         "frame_time_ms": 50  # How many ms should each frame show for? (Optional, default=3)
-    }
+    },
+    # "konami": {  # very broken
+    #     "contents": KONAMI_LOGO,
+    #     "iterations": 3,
+    #     "frame_time_ms": 1000
+    # }
 }

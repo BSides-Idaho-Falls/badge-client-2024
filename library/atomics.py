@@ -4,7 +4,7 @@ from library.navigation import Menu
 from library.networking import Api
 import machine
 
-API_BASE_URL = "https://api-bsides.meecles.io"
+API_BASE_URL = "http://api-bsides.meecles.io"
 NEOPIXEL_PIN = 6
 NEOPIXEL_COUNT = 3
 WDT_ENABLED: bool = True
