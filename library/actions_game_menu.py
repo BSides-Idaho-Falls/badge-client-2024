@@ -63,12 +63,28 @@ class GameMenuActions(ButtonAction):
     def rob_house():
         response = atomics.API_CLASS.rob_house()
         if not response or not response["success"]:
-            atomics.DISPLAY.queue_item(QueueItem("popup", {
-                "delay": 50,
-                "message": [
-                    "No houses", "to rob"
-                ]
-            }))
+            reason = response["reason"] if "reason" in response else "n/a"
+            if reason == "You are trying to rob houses too often!":
+                seconds = str(response["seconds"])
+                atomics.DISPLAY.queue_item(QueueItem("popup", {
+                    "delay": 1000,
+                    "message": [
+                        "Robbing", "too often"
+                    ]
+                }))
+                atomics.DISPLAY.queue_item(QueueItem("popup", {
+                    "delay": 50,
+                    "message": [
+                        "Try in", f"{seconds} secs"
+                    ]
+                }))
+            else:
+                atomics.DISPLAY.queue_item(QueueItem("popup", {
+                    "delay": 50,
+                    "message": [
+                        "No houses", "to rob"
+                    ]
+                }))
             print(f"There are no houses available to rob!")
             return False
         queue_item = QueueItem(

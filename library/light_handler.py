@@ -46,6 +46,15 @@ class LightPatterns:
                 LightQueue(off, off, off, 300),
                 LightQueue(red, red, red, 500),
                 LightQueue(off, off, off, 200)
+            ],
+            "rob_success": [
+                LightQueue(green, green, green, 700),
+                LightQueue(off, off, off, 500),
+                LightQueue(green, green, green, 500),
+                LightQueue(blue, blue, blue, 700),
+                LightQueue(off, off, off, 500),
+                LightQueue(green, green, green, 800),
+                LightQueue(off, off, off, 500)
             ]
         }
         if name not in patterns:
@@ -122,6 +131,7 @@ class Lights:
         await self.update_leds(light_queue)
 
     async def update_leds(self, light_queue: LightQueue):
+        # TODO: Determine actual LED order
         if light_queue.led_left:
             self.np[0] = light_queue.led_left
         if light_queue.led_center:

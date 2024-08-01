@@ -113,6 +113,7 @@ class GameActions(ButtonAction):
     @staticmethod
     def move_in_house(direction):
         response = atomics.API_CLASS.move(direction)
+        print(response)
         if not response["success"]:
             message = response.get("reason", "")
             if message == "You are not in a house.":
@@ -126,6 +127,8 @@ class GameActions(ButtonAction):
         if "robbed" in response and response["robbed"]:
             dollars: int = response["contents"]["dollars"]
             print(f"You robbed the house! You got {dollars} dollars.")
+            for item in LightPatterns.get_pattern("rob_success"):
+                atomics.LIGHTS.adaptive_queue(item)
             atomics.DISPLAY.queue_item(QueueItem("popup", {
                 "delay": 2100,
                 "message": [
