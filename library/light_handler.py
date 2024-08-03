@@ -40,7 +40,8 @@ class LightPatterns:
                 LightQueue(green, off, green, 100),
                 LightQueue(off, green, off, 1000),
                 LightQueue(blue, off, blue, 100),
-                LightQueue(off, blue, off, 100)
+                LightQueue(off, blue, off, 600),
+                LightQueue(off, off, off, 100)
             ],
             "blink_red": [
                 LightQueue(off, off, off, 300),
@@ -133,9 +134,9 @@ class Lights:
     async def update_leds(self, light_queue: LightQueue):
         # TODO: Determine actual LED order
         if light_queue.led_left:
-            self.np[0] = light_queue.led_left
+            self.np[1] = light_queue.led_left
         if light_queue.led_center:
-            self.np[1] = light_queue.led_center
+            self.np[0] = light_queue.led_center
         if light_queue.led_right:
             self.np[2] = light_queue.led_right
         self.np.write()

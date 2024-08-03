@@ -37,6 +37,14 @@ class LightMenuActions(ButtonAction):
         if selected_item == "blink":
             LightPatterns.get_pattern("blink_test", auto_queue=True)
             return
+        if selected_item == "test":
+            red = LightPatterns.get_by_color("red")
+            green = LightPatterns.get_by_color("green")
+            blue = LightPatterns.get_by_color("blue")
+            atomics.LIGHTS.queue_item(
+                LightQueue(led_left=red, led_center=green, led_right=blue)
+            )
+            return
         if selected_item == "adaptive":
             atomics.LIGHTS.is_adaptive = not atomics.LIGHTS.is_adaptive
             enable_msg: str = "Enabled" if atomics.LIGHTS.is_adaptive else "Disabled"
