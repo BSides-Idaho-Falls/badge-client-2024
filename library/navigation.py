@@ -138,22 +138,22 @@ class GameMenu(Menu):
             "enter": {
                 "message": "Enter House",
                 "before": "shop",
-                "after": "rob",
+                "next": "rob",
             },
             "rob": {
                 "message": "Rob House",
                 "before": "enter",
-                "after": "shop"
+                "next": "shop"
             },
             "bank": {
                 "message": "Rob Bank",
                 "before": "rob",
-                "after": "shop"
+                "next": "shop"
             },
             "shop": {
                 "message": "Shop",
                 "before": "rob",
-                "after": "enter"
+                "next": "enter"
             }
         }
 
