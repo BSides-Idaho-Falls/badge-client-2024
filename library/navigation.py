@@ -132,12 +132,29 @@ class GameMenu(Menu):
         self.header = " - Game Menu - "
         self.selected_item: str = "enter"
         self.menu_order = [
-            "enter", "rob", "shop"
+            "enter", "rob", "bank", "shop"
         ]
         self.actions = {
-            "enter": "Enter House",
-            "rob": "Rob House",
-            "shop": "Shop"
+            "enter": {
+                "message": "Enter House",
+                "before": "shop",
+                "after": "rob",
+            },
+            "rob": {
+                "message": "Rob House",
+                "before": "enter",
+                "after": "shop"
+            },
+            "bank": {
+                "message": "Rob Bank",
+                "before": "rob",
+                "after": "shop"
+            },
+            "shop": {
+                "message": "Shop",
+                "before": "rob",
+                "after": "enter"
+            }
         }
 
 
