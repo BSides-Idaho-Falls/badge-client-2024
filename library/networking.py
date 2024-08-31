@@ -192,7 +192,7 @@ class Api:
             atomics.LIGHTS.adaptive_queue(LightPatterns.get_pattern("blink_red"))
             return response_data
         self.leave_house()
-        return None
+        return self.rob_house()
 
     def enter_house(self):
         if not atomics.NETWORK_MAC:
