@@ -73,29 +73,7 @@ async def btn_listener():
 
     btn_b.release_func(ba.primary_select, ())  # in game, perform selected action
     btn_a.release_func(ba.primary_modify, ())  # in game, change action
-
     btn_a.long_func(ba.secondary_select, ())  # in game, leave house
-
-    # Short press btn_right -> action_forward
-    #btn_select.release_func(ba.action_forward, ())
-
-    # Short press btn_left -> action_backward
-    #btn_start.release_func(ba.action_backward, ())
-
-    # Long press btn_right -> primary_select
-    #btn_select.long_func(ba.primary_select, ())
-
-    # Long press btn_left -> secondary_select
-    #btn_start.long_func(ba.secondary_select, ())
-
-    # Double press btn_right -> secondary_modify
-    #btn_select.double_func(ba.secondary_modify, ())
-
-    # Double press btn_left -> primary_modify
-    #btn_start.double_func(ba.primary_modify, ())
-
-    # Hybrid actions also exist. For example, move a player right in their house
-    # example_btn_move_right.release_func(ba.hybrid_action_move, ("right"))
 
     dpad_up.release_func(ba.dpad_action, ("up"))
     dpad_right.release_func(ba.dpad_action, ("right"))
