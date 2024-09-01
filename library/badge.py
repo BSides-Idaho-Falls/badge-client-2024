@@ -76,9 +76,13 @@ async def btn_listener():
     btn_a.long_func(ba.secondary_select, ())  # in game, leave house
 
     dpad_up.release_func(ba.dpad_action, ("up"))
+    dpad_up.double_func(ba.double_up, ())  # better konami code detection
+
     dpad_right.release_func(ba.dpad_action, ("right"))
     dpad_left.release_func(ba.dpad_action, ("left"))
+
     dpad_down.release_func(ba.dpad_action, ("down"))
+    dpad_down.double_func(ba.double_down, ()) # better konami code detection
 
     await asyncio.sleep_ms(1000)
 

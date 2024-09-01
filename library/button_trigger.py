@@ -214,3 +214,25 @@ def dpad_action(direction):
         return  # Shouldn't happen but who knows
 
     return hybrid_action_move(direction)
+
+
+def double_up():
+    """Better konami code detection"""
+    if atomics.FREEZE_BUTTONS:
+        return
+    is_menu: bool = "_menu" in atomics.STATE
+    if not is_menu:
+        return
+    process_konami("up")
+    process_konami("up")
+
+
+def double_down():
+    """Better konami code detection"""
+    if atomics.FREEZE_BUTTONS:
+        return
+    is_menu: bool = "_menu" in atomics.STATE
+    if not is_menu:
+        return
+    process_konami("down")
+    process_konami("down")
