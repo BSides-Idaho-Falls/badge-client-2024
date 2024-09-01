@@ -13,8 +13,8 @@ WDT_ENABLED: bool = True
 # If you rename them, you will also need to adjust these values in
 # badge.py::init_btns() and badge.py::btn_listener
 
-PB0 = None  # Right button (Select)
-PB1 = None  # Left button (Start?)
+PB0 = None  # Right button (B)
+PB1 = None  # Left button (A)
 
 
 # Dpad buttons
