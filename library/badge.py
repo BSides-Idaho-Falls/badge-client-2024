@@ -19,13 +19,23 @@ oled_h = fu.init_oled(i2c_h)
 
 def init_btns():
     # Initialize buttons from pins into buttons
-    button1 = fu.machine.Pin(1, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
-    button0 = fu.machine.Pin(0, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
+    button0 = fu.machine.Pin(0, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # Right button
+    button1 = fu.machine.Pin(1, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # Left button
+
+    # dpad buttons
+    button2 = fu.machine.Pin(10, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # up
+    button3 = fu.machine.Pin(9, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # right
+    button4 = fu.machine.Pin(8, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # left
+    button5 = fu.machine.Pin(7, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # down
 
     # Initialize buttons into static variables in the atomics file.
     # Allows detecting press, double-press & long-press
     atomics.PB0 = Pushbutton(button0, suppress=True)
     atomics.PB1 = Pushbutton(button1, suppress=True)
+    atomics.PB2 = Pushbutton(button2, suppress=True)
+    atomics.PB3 = Pushbutton(button3, suppress=True)
+    atomics.PB4 = Pushbutton(button4, suppress=True)
+    atomics.PB5 = Pushbutton(button5, suppress=True)
 
 
 def init_api():
@@ -45,34 +55,52 @@ def init_api():
 
 async def btn_listener():
     # Grab the buttons as defined in init_btns
-    btn_right = atomics.PB0
-    btn_left = atomics.PB1
-    if not btn_right or not btn_left:
+    btn_b = atomics.PB0
+    btn_a = atomics.PB1
+
+    dpad_up = atomics.PB2
+    dpad_right = atomics.PB3
+    dpad_left = atomics.PB4
+    dpad_down = atomics.PB5
+
+    if not btn_b or not btn_a:
         print("Error init buttons")
         return
 
-    # List of actions and what they do can be found in /library/button_trigger.py
+    if not dpad_up or not dpad_right or not dpad_left or not dpad_down:
+        print("Error init dpad buttons")
+        return
+
+    btn_b.release_func(ba.primary_select, ())  # in game, perform selected action
+    btn_a.release_func(ba.primary_modify, ())  # in game, change action
+
+    btn_a.long_func(ba.secondary_select, ())  # in game, leave house
 
     # Short press btn_right -> action_forward
-    btn_right.release_func(ba.action_forward, ())
+    #btn_select.release_func(ba.action_forward, ())
 
     # Short press btn_left -> action_backward
-    btn_left.release_func(ba.action_backward, ())
+    #btn_start.release_func(ba.action_backward, ())
 
     # Long press btn_right -> primary_select
-    btn_right.long_func(ba.primary_select, ())
+    #btn_select.long_func(ba.primary_select, ())
 
     # Long press btn_left -> secondary_select
-    btn_left.long_func(ba.secondary_select, ())
+    #btn_start.long_func(ba.secondary_select, ())
 
     # Double press btn_right -> secondary_modify
-    btn_right.double_func(ba.secondary_modify, ())
+    #btn_select.double_func(ba.secondary_modify, ())
 
     # Double press btn_left -> primary_modify
-    btn_left.double_func(ba.primary_modify, ())
+    #btn_start.double_func(ba.primary_modify, ())
 
     # Hybrid actions also exist. For example, move a player right in their house
     # example_btn_move_right.release_func(ba.hybrid_action_move, ("right"))
+
+    dpad_up.release_func(ba.dpad_action, ("up"))
+    dpad_right.release_func(ba.dpad_action, ("right"))
+    dpad_left.release_func(ba.dpad_action, ("left"))
+    dpad_down.release_func(ba.dpad_action, ("down"))
 
     await asyncio.sleep_ms(1000)
 

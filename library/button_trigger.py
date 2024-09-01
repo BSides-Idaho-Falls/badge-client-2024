@@ -44,6 +44,28 @@ BUTTON_ACTION_MAPPER: dict = {
 }
 
 
+def _is_konami_complete() -> bool:
+    return atomics.KONAMI_PRESSES == atomics.EXPECTED_KONAMI
+
+
+def _correct_konami_sequence() -> bool:
+    return "".join(atomics.EXPECTED_KONAMI).startswith("".join(atomics.KONAMI_PRESSES))
+
+
+def _konami_complete():
+    atomics.KONAMI_PRESSES = []
+    print("You did the konami code!")
+    # TODO: display konami animation
+
+
+def process_konami(btn_pressed):
+    atomics.KONAMI_PRESSES.append(btn_pressed)
+    if _is_konami_complete():
+        return _konami_complete()
+    if not _correct_konami_sequence():
+        atomics.KONAMI_PRESSES = []
+
+
 def create_instance(class_name):
     instance = BUTTON_ACTION_MAPPER.get(class_name)
     return instance() if class_name in BUTTON_ACTION_MAPPER else None
@@ -52,6 +74,11 @@ def create_instance(class_name):
 def action_forward():
     if atomics.FREEZE_BUTTONS:
         return
+
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu:
+        return  # we only want the dpad to control menus now.
+
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print(f"action_forward no function for this state | {atomics.STATE}")
@@ -65,6 +92,10 @@ def action_forward():
 def action_backward():
     if atomics.FREEZE_BUTTONS:
         return
+
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu:
+        return  # we only want the dpad to control menus now.
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
@@ -80,6 +111,11 @@ def primary_select():
     if atomics.FREEZE_BUTTONS:
         return
 
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu:
+        process_konami("b")
+        return  # we only want the dpad to control menus now.
+
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("primary_select has no function for this state")
@@ -93,6 +129,10 @@ def primary_select():
 def secondary_select():
     if atomics.FREEZE_BUTTONS:
         return
+
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu:
+        return  # we only want the dpad to control menus now.
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
@@ -122,6 +162,10 @@ def primary_modify():
     if atomics.FREEZE_BUTTONS:
         return
 
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu:
+        process_konami("a")
+
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("primary_modify has no function for this state")
@@ -140,7 +184,33 @@ def hybrid_action_move(direction):
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("hybrid_action_move has no function for this state.")
+        return
     try:
         action.hybrid_action_move(direction)
     except NotImplementedError:
         print(f"Extra action being attempted - {atomics.STATE}")
+
+
+def dpad_action(direction):
+    """This is an attempt for a dpad action being mapped to multiple things."""
+    if atomics.FREEZE_BUTTONS:
+        return
+
+    is_menu: bool = "_menu" in atomics.STATE
+
+    if is_menu:
+        if direction == "right":
+            process_konami("right")
+            return primary_select()
+        if direction == "left":
+            process_konami("left")
+            return secondary_select()
+        if direction == "down":
+            process_konami("down")
+            return action_forward()
+        if direction == "up":
+            process_konami("up")
+            return action_backward()
+        return  # Shouldn't happen but who knows
+
+    return hybrid_action_move(direction)
