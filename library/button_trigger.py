@@ -199,17 +199,14 @@ def dpad_action(direction):
     is_menu: bool = "_menu" in atomics.STATE
 
     if is_menu:
+        process_konami(direction)
         if direction == "right":
-            process_konami("right")
             return primary_select()
         if direction == "left":
-            process_konami("left")
             return secondary_select()
         if direction == "down":
-            process_konami("down")
             return action_forward()
         if direction == "up":
-            process_konami("up")
             return action_backward()
         return  # Shouldn't happen but who knows
 
