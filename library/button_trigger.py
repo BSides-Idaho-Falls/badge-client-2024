@@ -75,10 +75,6 @@ def action_forward():
     if atomics.FREEZE_BUTTONS:
         return
 
-    is_menu: bool = "_menu" in atomics.STATE
-    if is_menu:
-        return  # we only want the dpad to control menus now.
-
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print(f"action_forward no function for this state | {atomics.STATE}")
@@ -93,10 +89,6 @@ def action_backward():
     if atomics.FREEZE_BUTTONS:
         return
 
-    is_menu: bool = "_menu" in atomics.STATE
-    if is_menu:
-        return  # we only want the dpad to control menus now.
-
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("action_backward has no function for this state")
@@ -107,14 +99,13 @@ def action_backward():
         print(f"Extra action being attempted - {atomics.STATE}")
 
 
-def primary_select():
+def primary_select(konami_override=False):
     if atomics.FREEZE_BUTTONS:
         return
 
     is_menu: bool = "_menu" in atomics.STATE
-    if is_menu:
+    if is_menu and not konami_override:
         process_konami("b")
-        return  # we only want the dpad to control menus now.
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
@@ -129,10 +120,6 @@ def primary_select():
 def secondary_select():
     if atomics.FREEZE_BUTTONS:
         return
-
-    is_menu: bool = "_menu" in atomics.STATE
-    if is_menu:
-        return  # we only want the dpad to control menus now.
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
@@ -193,7 +180,6 @@ def hybrid_action_move(direction):
 
 def dpad_action(direction):
     """This is an attempt for a dpad action being mapped to multiple things."""
-    print(f"Pressed dpad {direction}")
     if atomics.FREEZE_BUTTONS:
         return
 
@@ -202,15 +188,15 @@ def dpad_action(direction):
     if is_menu:
         process_konami(direction)
         if direction == "right":
-            return primary_select()
+            return primary_select(konami_override=True)
         if direction == "left":
             return secondary_select()
         if direction == "down":
             return action_forward()
         if direction == "up":
             return action_backward()
+        print("darn im returning!")
         return  # Shouldn't happen but who knows
-
     return hybrid_action_move(direction)
 
 
