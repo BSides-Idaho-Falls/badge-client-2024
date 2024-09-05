@@ -21,6 +21,7 @@ This is where buttons get translated into actions.
     - Combination of action_backward() and action_forward().
     - When in a house, moves player <direction>
 """
+from display_helper import KONAMI_LOGO
 from library import atomics
 from library.action_class import ButtonAction
 from library.actions_animation_menu import AnimationMenuActions
@@ -31,6 +32,7 @@ from library.actions_light_menu import LightMenuActions
 from library.actions_main_menu import MainMenuActions
 from library.actions_offline_menu import OfflineMenuActions
 from library.actions_shop_menu import ShopMenuActions
+from library.display import QueueItem
 
 BUTTON_ACTION_MAPPER: dict = {
     "game": GameActions,
@@ -44,6 +46,28 @@ BUTTON_ACTION_MAPPER: dict = {
 }
 
 
+def _is_konami_complete() -> bool:
+    return atomics.KONAMI_PRESSES == atomics.EXPECTED_KONAMI
+
+
+def _correct_konami_sequence() -> bool:
+    return "".join(atomics.EXPECTED_KONAMI).startswith("".join(atomics.KONAMI_PRESSES))
+
+
+def _konami_complete():
+    atomics.KONAMI_PRESSES = []
+    print("You did the konami code!")
+    atomics.DISPLAY.queue_item(QueueItem("animation", KONAMI_LOGO, 150))
+
+
+def process_konami(btn_pressed):
+    atomics.KONAMI_PRESSES.append(btn_pressed)
+    if _is_konami_complete():
+        return _konami_complete()
+    if not _correct_konami_sequence():
+        atomics.KONAMI_PRESSES = []
+
+
 def create_instance(class_name):
     instance = BUTTON_ACTION_MAPPER.get(class_name)
     return instance() if class_name in BUTTON_ACTION_MAPPER else None
@@ -52,6 +76,7 @@ def create_instance(class_name):
 def action_forward():
     if atomics.FREEZE_BUTTONS:
         return
+
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print(f"action_forward no function for this state | {atomics.STATE}")
@@ -76,9 +101,13 @@ def action_backward():
         print(f"Extra action being attempted - {atomics.STATE}")
 
 
-def primary_select():
+def primary_select(konami_override=False):
     if atomics.FREEZE_BUTTONS:
         return
+
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu and not konami_override:
+        process_konami("b")
 
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
@@ -122,6 +151,10 @@ def primary_modify():
     if atomics.FREEZE_BUTTONS:
         return
 
+    is_menu: bool = "_menu" in atomics.STATE
+    if is_menu:
+        process_konami("a")
+
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("primary_modify has no function for this state")
@@ -140,7 +173,68 @@ def hybrid_action_move(direction):
     action: ButtonAction = create_instance(atomics.STATE)
     if not action:
         print("hybrid_action_move has no function for this state.")
+        return
     try:
         action.hybrid_action_move(direction)
     except NotImplementedError:
         print(f"Extra action being attempted - {atomics.STATE}")
+
+
+def dpad_action(direction):
+    """This is an attempt for a dpad action being mapped to multiple things."""
+    if atomics.FREEZE_BUTTONS:
+        return
+
+    is_menu: bool = "_menu" in atomics.STATE
+
+    if is_menu:
+        process_konami(direction)
+        if direction == "right":
+            return primary_select(konami_override=True)
+        if direction == "left":
+            return secondary_select()
+        if direction == "down":
+            return action_forward()
+        if direction == "up":
+            return action_backward()
+        print("darn im returning!")
+        return  # Shouldn't happen but who knows
+    return hybrid_action_move(direction)
+
+
+def dpad_action_left():
+    return dpad_action("left")
+
+
+def dpad_action_right():
+    return dpad_action("right")
+
+
+def dpad_action_up():
+    return dpad_action("up")
+
+
+def dpad_action_down():
+    return dpad_action("down")
+
+
+def double_up():
+    """Better konami code detection"""
+    if atomics.FREEZE_BUTTONS:
+        return
+    is_menu: bool = "_menu" in atomics.STATE
+    if not is_menu:
+        return
+    process_konami("up")
+    process_konami("up")
+
+
+def double_down():
+    """Better konami code detection"""
+    if atomics.FREEZE_BUTTONS:
+        return
+    is_menu: bool = "_menu" in atomics.STATE
+    if not is_menu:
+        return
+    process_konami("down")
+    process_konami("down")

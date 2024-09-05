@@ -1,13 +1,14 @@
+import gc
 import json
 
 import uasyncio as asyncio
-import gc
+
 import initialization as fu
 import library.button_trigger as ba
+from display_helper import BSIDES_LOGO
 from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
-from display_helper import WINKING_POTATO
 from library.light_handler import Lights
 from library.navigation import MainMenu, OfflineMenu
 from library.networking import Networking, Api
@@ -19,13 +20,23 @@ oled_h = fu.init_oled(i2c_h)
 
 def init_btns():
     # Initialize buttons from pins into buttons
-    button1 = fu.machine.Pin(1, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
-    button0 = fu.machine.Pin(0, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)
+    button0 = fu.machine.Pin(0, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # Right button
+    button1 = fu.machine.Pin(1, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # Left button
+
+    # dpad buttons
+    button2 = fu.machine.Pin(10, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # up
+    button3 = fu.machine.Pin(9, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # right
+    button4 = fu.machine.Pin(8, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # left
+    button5 = fu.machine.Pin(7, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # down
 
     # Initialize buttons into static variables in the atomics file.
     # Allows detecting press, double-press & long-press
     atomics.PB0 = Pushbutton(button0, suppress=True)
     atomics.PB1 = Pushbutton(button1, suppress=True)
+    atomics.PB2 = Pushbutton(button2, suppress=True)
+    atomics.PB3 = Pushbutton(button3, suppress=True)
+    atomics.PB4 = Pushbutton(button4, suppress=True)
+    atomics.PB5 = Pushbutton(button5, suppress=True)
 
 
 def init_api():
@@ -45,34 +56,34 @@ def init_api():
 
 async def btn_listener():
     # Grab the buttons as defined in init_btns
-    btn_right = atomics.PB0
-    btn_left = atomics.PB1
-    if not btn_right or not btn_left:
+    btn_b = atomics.PB0
+    btn_a = atomics.PB1
+
+    dpad_up = atomics.PB2
+    dpad_right = atomics.PB3
+    dpad_left = atomics.PB4
+    dpad_down = atomics.PB5
+
+    if not btn_b or not btn_a:
         print("Error init buttons")
         return
 
-    # List of actions and what they do can be found in /library/button_trigger.py
+    if not dpad_up or not dpad_right or not dpad_left or not dpad_down:
+        print("Error init dpad buttons")
+        return
 
-    # Short press btn_right -> action_forward
-    btn_right.release_func(ba.action_forward, ())
+    btn_b.release_func(ba.primary_select, ())  # in game, perform selected action
+    btn_a.release_func(ba.primary_modify, ())  # in game, change action
+    btn_a.long_func(ba.secondary_select, ())  # in game, leave house
 
-    # Short press btn_left -> action_backward
-    btn_left.release_func(ba.action_backward, ())
+    dpad_up.release_func(ba.dpad_action_up, ())
+    dpad_up.double_func(ba.double_up, ())  # better konami code detection
 
-    # Long press btn_right -> primary_select
-    btn_right.long_func(ba.primary_select, ())
+    dpad_right.release_func(ba.dpad_action_right, ())
+    dpad_left.release_func(ba.dpad_action_left, ())
 
-    # Long press btn_left -> secondary_select
-    btn_left.long_func(ba.secondary_select, ())
-
-    # Double press btn_right -> secondary_modify
-    btn_right.double_func(ba.secondary_modify, ())
-
-    # Double press btn_left -> primary_modify
-    btn_left.double_func(ba.primary_modify, ())
-
-    # Hybrid actions also exist. For example, move a player right in their house
-    # example_btn_move_right.release_func(ba.hybrid_action_move, ("right"))
+    dpad_down.release_func(ba.dpad_action_down, ())
+    dpad_down.double_func(ba.double_down, ()) # better konami code detection
 
     await asyncio.sleep_ms(1000)
 
@@ -208,7 +219,7 @@ async def start_main():
     asyncio.create_task(screen_updater(atomics.DISPLAY))
     asyncio.create_task(light_queue(atomics.LIGHTS))
 
-    atomics.DISPLAY.queue_item(QueueItem("animation", WINKING_POTATO, 30))
+    atomics.DISPLAY.queue_item(QueueItem("animation", BSIDES_LOGO, 250))
 
     asyncio.create_task(networking.run())
     init_api()

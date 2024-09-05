@@ -13,8 +13,17 @@ WDT_ENABLED: bool = True
 # If you rename them, you will also need to adjust these values in
 # badge.py::init_btns() and badge.py::btn_listener
 
-PB0 = None
-PB1 = None
+PB0 = None  # Right button (B)
+PB1 = None  # Left button (A)
+
+
+# Dpad buttons
+PB2 = None
+PB3 = None
+PB4 = None
+PB5 = None
+
+
 
 ### DO NOT EDIT ANY VALUES BELOW THIS LINE ###
 # These values are all modified by the application
@@ -45,6 +54,9 @@ ANIMATE_MENU: Menu = None
 OFFLINE_MENU: Menu = None
 SHOP_MENU: Menu = None
 GAME_STATE: GameState = None
+
+KONAMI_PRESSES = []
+EXPECTED_KONAMI = ["up", "up", "down", "down", "left", "right", "left", "right", "b", "a"]
 
 
 # Yes including these! Do not edit these! (or do, idk)
