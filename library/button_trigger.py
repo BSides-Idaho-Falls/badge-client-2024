@@ -193,6 +193,7 @@ def hybrid_action_move(direction):
 
 def dpad_action(direction):
     """This is an attempt for a dpad action being mapped to multiple things."""
+    print(f"Pressed dpad {direction}")
     if atomics.FREEZE_BUTTONS:
         return
 
@@ -211,6 +212,22 @@ def dpad_action(direction):
         return  # Shouldn't happen but who knows
 
     return hybrid_action_move(direction)
+
+
+def dpad_action_left():
+    return dpad_action("left")
+
+
+def dpad_action_right():
+    return dpad_action("right")
+
+
+def dpad_action_up():
+    return dpad_action("up")
+
+
+def dpad_action_down():
+    return dpad_action("down")
 
 
 def double_up():
