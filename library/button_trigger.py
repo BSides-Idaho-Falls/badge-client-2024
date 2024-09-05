@@ -21,6 +21,7 @@ This is where buttons get translated into actions.
     - Combination of action_backward() and action_forward().
     - When in a house, moves player <direction>
 """
+from display_helper import KONAMI_LOGO
 from library import atomics
 from library.action_class import ButtonAction
 from library.actions_animation_menu import AnimationMenuActions
@@ -31,6 +32,7 @@ from library.actions_light_menu import LightMenuActions
 from library.actions_main_menu import MainMenuActions
 from library.actions_offline_menu import OfflineMenuActions
 from library.actions_shop_menu import ShopMenuActions
+from library.display import QueueItem
 
 BUTTON_ACTION_MAPPER: dict = {
     "game": GameActions,
@@ -55,7 +57,7 @@ def _correct_konami_sequence() -> bool:
 def _konami_complete():
     atomics.KONAMI_PRESSES = []
     print("You did the konami code!")
-    # TODO: display konami animation
+    atomics.DISPLAY.queue_item(QueueItem("animation", KONAMI_LOGO, 150))
 
 
 def process_konami(btn_pressed):

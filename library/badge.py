@@ -1,13 +1,14 @@
+import gc
 import json
 
 import uasyncio as asyncio
-import gc
+
 import initialization as fu
 import library.button_trigger as ba
+from display_helper import BSIDES_LOGO
 from library import atomics, fileio
 from library.buttons import Pushbutton
 from library.display import Display, QueueItem
-from display_helper import WINKING_POTATO
 from library.light_handler import Lights
 from library.navigation import MainMenu, OfflineMenu
 from library.networking import Networking, Api
@@ -218,7 +219,7 @@ async def start_main():
     asyncio.create_task(screen_updater(atomics.DISPLAY))
     asyncio.create_task(light_queue(atomics.LIGHTS))
 
-    atomics.DISPLAY.queue_item(QueueItem("animation", WINKING_POTATO, 30))
+    atomics.DISPLAY.queue_item(QueueItem("animation", BSIDES_LOGO, 250))
 
     asyncio.create_task(networking.run())
     init_api()
