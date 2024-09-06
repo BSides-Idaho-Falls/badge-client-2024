@@ -23,7 +23,7 @@ PB3 = None
 PB4 = None
 PB5 = None
 
-BADGE_YEAR = "2024"  # 2023 if you have the badge from 2023! :)
+BADGE_YEAR = "2023"  # 2023 if you have the badge from 2023! :)
 
 ### DO NOT EDIT ANY VALUES BELOW THIS LINE ###
 # These values are all modified by the application

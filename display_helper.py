@@ -1,5 +1,3 @@
-from library import atomics
-
 WINKING_POTATO = {
     "sequence": [0, 0, 0, 5, 6, 6, 5, 0, 0, 3, 4, 4, 3, 0, 0, 1, 2, 2, 1, 0, 0, 0],
     "frames": [
@@ -66,11 +64,3 @@ ANIMATION_MAPPER = {
         "frame_time_ms": 500
     }
 }
-
-if atomics.most_recent():
-    ANIMATION_MAPPER["konami"] = {
-        "contents": KONAMI_LOGO,
-        "iterations": 1,
-        "frame_time_ms": 150
-    }
-
