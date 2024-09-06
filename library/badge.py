@@ -24,19 +24,22 @@ def init_btns():
     button1 = fu.machine.Pin(1, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # Left button
 
     # dpad buttons
-    button2 = fu.machine.Pin(10, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # up
-    button3 = fu.machine.Pin(9, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # right
-    button4 = fu.machine.Pin(8, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # left
-    button5 = fu.machine.Pin(7, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # down
+    button2, button3, button4, button5 = None, None, None, None
+    if atomics.most_recent():
+        button2 = fu.machine.Pin(10, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)  # up
+        button3 = fu.machine.Pin(9, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # right
+        button4 = fu.machine.Pin(8, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # left
+        button5 = fu.machine.Pin(7, fu.machine.Pin.IN, fu.machine.Pin.PULL_UP)   # down
 
     # Initialize buttons into static variables in the atomics file.
     # Allows detecting press, double-press & long-press
     atomics.PB0 = Pushbutton(button0, suppress=True)
     atomics.PB1 = Pushbutton(button1, suppress=True)
-    atomics.PB2 = Pushbutton(button2, suppress=True)
-    atomics.PB3 = Pushbutton(button3, suppress=True)
-    atomics.PB4 = Pushbutton(button4, suppress=True)
-    atomics.PB5 = Pushbutton(button5, suppress=True)
+
+    atomics.PB2 = Pushbutton(button2, suppress=True) if atomics.most_recent() else None
+    atomics.PB3 = Pushbutton(button3, suppress=True) if atomics.most_recent() else None
+    atomics.PB4 = Pushbutton(button4, suppress=True) if atomics.most_recent() else None
+    atomics.PB5 = Pushbutton(button5, suppress=True) if atomics.most_recent() else None
 
 
 def init_api():
@@ -59,10 +62,13 @@ async def btn_listener():
     btn_b = atomics.PB0
     btn_a = atomics.PB1
 
-    dpad_up = atomics.PB2
-    dpad_right = atomics.PB3
-    dpad_left = atomics.PB4
-    dpad_down = atomics.PB5
+    dpad_up, dpad_right, dpad_left, dpad_down = None, None, None, None
+
+    if atomics.most_recent():
+        dpad_up = atomics.PB2
+        dpad_right = atomics.PB3
+        dpad_left = atomics.PB4
+        dpad_down = atomics.PB5
 
     if not btn_b or not btn_a:
         print("Error init buttons")
@@ -70,20 +76,29 @@ async def btn_listener():
 
     if not dpad_up or not dpad_right or not dpad_left or not dpad_down:
         print("Error init dpad buttons")
-        return
+        if atomics.most_recent():
+            return
 
-    btn_b.release_func(ba.primary_select, ())  # in game, perform selected action
-    btn_a.release_func(ba.primary_modify, ())  # in game, change action
-    btn_a.long_func(ba.secondary_select, ())  # in game, leave house
+    if atomics.most_recent():
+        btn_b.release_func(ba.primary_select, ())  # in game, perform selected action
+        btn_a.release_func(ba.primary_modify, ())  # in game, change action
+        btn_a.long_func(ba.secondary_select, ())  # in game, leave house
 
-    dpad_up.release_func(ba.dpad_action_up, ())
-    dpad_up.double_func(ba.double_up, ())  # better konami code detection
+        dpad_up.release_func(ba.dpad_action_up, ())
+        dpad_up.double_func(ba.double_up, ())  # better konami code detection
 
-    dpad_right.release_func(ba.dpad_action_right, ())
-    dpad_left.release_func(ba.dpad_action_left, ())
+        dpad_right.release_func(ba.dpad_action_right, ())
+        dpad_left.release_func(ba.dpad_action_left, ())
 
-    dpad_down.release_func(ba.dpad_action_down, ())
-    dpad_down.double_func(ba.double_down, ()) # better konami code detection
+        dpad_down.release_func(ba.dpad_action_down, ())
+        dpad_down.double_func(ba.double_down, ())  # better konami code detection
+    else:
+        btn_b.release_func(ba.action_forward, ())
+        btn_a.release_func(ba.action_backward, ())
+        btn_b.long_func(ba.primary_select, ())
+        btn_a.long_func(ba.secondary_select, ())
+        btn_b.double_func(ba.secondary_modify, ())
+        btn_a.double_func(ba.primary_modify, ())
 
     await asyncio.sleep_ms(1000)
 
