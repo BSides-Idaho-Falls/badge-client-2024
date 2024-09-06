@@ -23,7 +23,7 @@ PB3 = None
 PB4 = None
 PB5 = None
 
-
+BADGE_YEAR = "2024"  # 2023 if you have the badge from 2023! :)
 
 ### DO NOT EDIT ANY VALUES BELOW THIS LINE ###
 # These values are all modified by the application
@@ -80,3 +80,7 @@ def starve():
     if wdt:
         machine.mem32[0x40058000] = machine.mem32[0x40058000] & ~(1 << 30)
         wdt = None
+
+
+def most_recent():
+    return BADGE_YEAR == "2024"

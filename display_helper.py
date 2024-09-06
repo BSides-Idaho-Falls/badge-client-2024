@@ -64,4 +64,3 @@ ANIMATION_MAPPER = {
         "frame_time_ms": 500
     }
 }
-

@@ -61,6 +61,8 @@ def _konami_complete():
 
 
 def process_konami(btn_pressed):
+    if not atomics.most_recent():
+        return
     atomics.KONAMI_PRESSES.append(btn_pressed)
     if _is_konami_complete():
         return _konami_complete()
