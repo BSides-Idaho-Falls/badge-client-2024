@@ -7,7 +7,7 @@ import machine
 API_BASE_URL = "http://api-bsides.meecles.io"
 NEOPIXEL_PIN = 6
 NEOPIXEL_COUNT = 3
-WDT_ENABLED: bool = False
+WDT_ENABLED: bool = True
 
 # The values immediately below are for button initialization.
 # If you rename them, you will also need to adjust these values in
@@ -23,7 +23,7 @@ PB3 = None
 PB4 = None
 PB5 = None
 
-BADGE_YEAR = "2023"  # 2023 if you have the badge from 2023! :)
+BADGE_YEAR = "2024"  # 2023 if you have the badge from 2023! :)
 
 ### DO NOT EDIT ANY VALUES BELOW THIS LINE ###
 # These values are all modified by the application
