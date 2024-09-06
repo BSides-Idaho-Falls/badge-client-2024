@@ -82,6 +82,7 @@ async def btn_listener():
     if atomics.most_recent():
         btn_b.release_func(ba.primary_select, ())  # in game, perform selected action
         btn_a.release_func(ba.primary_modify, ())  # in game, change action
+        btn_a.double_func(ba.action_backward, ())
         btn_a.long_func(ba.secondary_select, ())  # in game, leave house
 
         dpad_up.release_func(ba.dpad_action_up, ())
