@@ -16,19 +16,19 @@ np = NeoPixel(np_pin,3)
 np[0] = np[1] = np[2] = (127,127,127)
 np.write()
 
-i2c = I2C(0,sda=Pin(4), scl=Pin(5),freq=400_000)
-display = SSD1306_I2C(128,64,i2c)
-# cute test of the SSD1306 display
-display.fill(1)
-display.text('BSidesIF Blue', 4, 8, 0)
-display.text('Screen of Death', 4, 20, 0)
-display.rect(70,45,3,3,0,True)
-display.rect(70,51,3,3,0,True)
-display.ellipse(64,48,3,7,0,False,9)
-display.show()
+# i2c = I2C(0,sda=Pin(4), scl=Pin(5),freq=400_000)
+# display = SSD1306_I2C(128,64,i2c)
+# # cute test of the SSD1306 display
+# display.fill(1)
+# display.text('BSidesIF Blue', 4, 8, 0)
+# display.text('Screen of Death', 4, 20, 0)
+# display.rect(70,45,3,3,0,True)
+# display.rect(70,51,3,3,0,True)
+# display.ellipse(64,48,3,7,0,False,9)
+# display.show()
 
 # test the buttonswitches and LEDs, but not forever
-for i in range(66_666):
+while True:
     print(button1.value(), button0.value(), buttonU.value(), buttonL.value(), buttonR.value(), buttonD.value())
     if (button1.value() == 0):   # left button under screen
         np[1] = (0,255,0)        # paint left LED green
