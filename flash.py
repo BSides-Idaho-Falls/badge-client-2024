@@ -44,11 +44,15 @@ POSSIBLE_DEVICE_LOCATIONS: List[str] = [
     "/dev/cu.usbmodem101"  # Common location for MacOS
 ]
 
-FIRM_LOC = "./firmware/rp2-pico-w-20230426-v1.20.0.uf2"
+FIRM_LOC = "/tmp/"  # PLEASE FILL OUT WITH DEVICE LOCATION OF BADGE!!!
 
 
 def flash_firm():
-    shutil.copyfile('./rp2-pico-w-20230426-v1.20.0.uf2', f'{FIRM_LOC}rp2-pico-w-20230426-v1.20.0.uf2')
+    global FIRM_LOC
+    if not FIRM_LOC.endswith("/"):
+        FIRM_LOC = f"{FIRM_LOC}/"
+    dest_file: str = f'{FIRM_LOC}rp2-pico-w-20230426-v1.20.0.uf2'
+    shutil.copyfile('./firmware/rp2-pico-w-20230426-v1.20.0.uf2', dest_file)
     input("Please unplug the badge and plug it back in, then hit enter to continue!")
 
 
