@@ -45,6 +45,11 @@ class LightMenuActions(ButtonAction):
                 LightQueue(led_left=red, led_center=green, led_right=blue)
             )
             return
+        if selected_item == "red":
+            red = LightPatterns.get_by_color("red")
+            atomics.LIGHTS.queue_item(
+                LightQueue(led_left=red, led_center=red, led_right=red)
+            )
         if selected_item == "adaptive":
             atomics.LIGHTS.is_adaptive = not atomics.LIGHTS.is_adaptive
             enable_msg: str = "Enabled" if atomics.LIGHTS.is_adaptive else "Disabled"
