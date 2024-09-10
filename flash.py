@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import time
 from typing import List, Optional
 
@@ -42,6 +43,13 @@ POSSIBLE_DEVICE_LOCATIONS: List[str] = [
     "/dev/cu.usbmodem1401",  # Location behind USB hub on MacOS
     "/dev/cu.usbmodem101"  # Common location for MacOS
 ]
+
+FIRM_LOC = "./firmware/rp2-pico-w-20230426-v1.20.0.uf2"
+
+
+def flash_firm():
+    shutil.copyfile('./rp2-pico-w-20230426-v1.20.0.uf2', f'{FIRM_LOC}rp2-pico-w-20230426-v1.20.0.uf2')
+    input("Please unplug the badge and plug it back in, then hit enter to continue!")
 
 
 def waitfor(seconds: int):
@@ -101,10 +109,14 @@ def write_files(args):
 
 def go(args):
     if not args.loop:
+        if args.firmware:
+            flash_firm()
         write_files(args)
         return
     print("Looping flash write")
     while True:
+        if args.firmware:
+            flash_firm()
         print("Starting flash...")
         write_files(args)
         print("Complete! Disconnect badge before restarting")
@@ -130,6 +142,9 @@ def get_args():
     )
     parser.add_argument(
         '-R', '--reset', action='store_true', help='FULL RESET. Deletes db.json & writes all files.', default=False
+    )
+    parser.add_argument(
+        '-w', '--firmware', action='store_true', help='Flash Firmware!'
     )
     return parser.parse_args()
 
